@@ -192,7 +192,7 @@ export function validateManifest(manifest) {
     errors.push("updatedAt must be an ISO date-time");
   }
   if (expectedAdapter && !AVAILABLE_ADAPTERS.has(expectedAdapter)) {
-    warnings.push(`${expectedAdapter} is recognized but unavailable in Theme Hub Skill v0.3.0`);
+    warnings.push(`${expectedAdapter} is recognized but unavailable in SkinDex Skill v0.4.0`);
   }
 
   return { ok: errors.length === 0, errors, warnings };
@@ -262,7 +262,7 @@ async function writeJsonAtomic(filePath, value) {
 
 export async function stageManifest(manifest, { stateRoot = stateRootFromEnvironment(), now = () => new Date() } = {}) {
   const plan = planManifest(manifest, { stateRoot });
-  if (plan.status !== "ready") throw new Error(`${plan.adapter} is not available in Theme Hub Skill v0.3.0`);
+  if (plan.status !== "ready") throw new Error(`${plan.adapter} is not available in SkinDex Skill v0.4.0`);
 
   const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
   const revision = sha256(manifestText);
@@ -361,7 +361,7 @@ export async function restorePlan(transactionId, { stateRoot = stateRootFromEnvi
     return {
       status: "ready-for-confirmation",
       nextAction: "select-codex-default",
-      message: "No previous Theme Hub theme is recorded. Select the official default theme in Codex Appearance settings.",
+      message: "No previous SkinDex theme is recorded. Select the official default theme in Codex Appearance settings.",
     };
   }
 
@@ -410,7 +410,7 @@ export async function readStatus({ stateRoot = stateRootFromEnvironment() } = {}
 
 function endpointUrl(endpoint, pathname, search = {}) {
   const base = new URL(endpoint || DEFAULT_ENDPOINT);
-  if (base.protocol !== "https:") throw new Error("Theme Hub endpoint must use HTTPS");
+  if (base.protocol !== "https:") throw new Error("SkinDex endpoint must use HTTPS");
   const url = new URL(pathname, base);
   for (const [key, value] of Object.entries(search)) {
     if (value !== undefined && value !== "") url.searchParams.set(key, value);
@@ -420,7 +420,7 @@ function endpointUrl(endpoint, pathname, search = {}) {
 
 async function responseJson(response) {
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Theme Hub request failed with ${response.status}`);
+  if (!response.ok) throw new Error(data.error || `SkinDex request failed with ${response.status}`);
   return data;
 }
 
@@ -475,7 +475,7 @@ export function createLocalManifest({ id, name, author, surface, ink, accent, mo
     schemaVersion: "theme-hub/v1",
     id,
     name,
-    summary: "Locally generated Theme Hub color theme.",
+    summary: "Locally generated SkinDex color theme.",
     author: { name: author, url: DEFAULT_ENDPOINT },
     source: { repository: DEFAULT_ENDPOINT, revision: `local@${now().toISOString()}`, license: "NOASSERTION" },
     compatibility: { surfaces: ["codex-desktop"], os: ["macos", "windows", "linux"] },

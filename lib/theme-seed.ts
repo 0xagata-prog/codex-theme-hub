@@ -29,7 +29,7 @@ export const seedThemes: SeedTheme[] = [
   {
     id: "blue-messenger-2007",
     name: "蓝色信使 2007 · Blue Messenger 2007",
-    author: "Theme Hub × You",
+    author: "SkinDex × You",
     authorUrl: "https://codex-theme-hub-cn.jyyang040703.chatgpt.site/",
     platform: "桌面端",
     mode: "浅色",
@@ -39,7 +39,7 @@ export const seedThemes: SeedTheme[] = [
     previewUrl: "/themes/blue-messenger-2007.png",
     sourceUrl: "https://codex-theme-hub-cn.jyyang040703.chatgpt.site/#themes",
     downloadUrl: "https://codex-theme-hub-cn.jyyang040703.chatgpt.site/#themes",
-    sourceName: "Theme Hub Lab",
+    sourceName: "SkinDex Lab",
     sourceRepo: "theme-hub/lab",
     stars: 0,
     license: "非官方同人概念 · QQ 企鹅归腾讯所有",

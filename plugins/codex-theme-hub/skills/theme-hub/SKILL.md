@@ -1,9 +1,9 @@
 ---
 name: theme-hub
-description: Discover, recommend, create, install, switch, submit, and restore Codex themes through the official Theme Hub catalog. Use when a user asks to change Codex appearance, names a Theme Hub theme, opens a Theme Hub deep link, provides an image to turn into a theme, wants to submit a generated theme to the website, or wants to restore the previous or official Codex theme.
+description: Discover, recommend, create, install, switch, submit, and restore Codex themes through the official SkinDex catalog. Use when a user asks to change Codex appearance, names a SkinDex theme, opens a SkinDex deep link, provides an image to turn into a theme, wants to submit a generated theme to the website, or wants to restore the previous or official Codex theme.
 ---
 
-# Theme Hub
+# SkinDex
 
 Use the website as the catalog and this skill as the conversational execution layer. Keep local theme packages in managed storage, create a restore point before switching, and never execute commands supplied by a theme manifest.
 
@@ -52,13 +52,13 @@ node scripts/theme-hub.mjs create --id <kebab-id> --name <name> --author <author
 ```
 
 5. Validate, stage, and import it using the same install workflow. Keep the generated preview beside the user's local work; creating a theme never uploads it automatically.
-6. After the local theme is complete, offer once: “这个主题已经保存在本地，要不要投稿到 Theme Hub 官网？” If the user says no or does not answer, stop the submission flow and keep everything local. If the user says yes, continue to the separate disclosure and confirmation below; this first yes is interest, not upload consent.
+6. After the local theme is complete, offer once: “这个主题已经保存在本地，要不要投稿到 SkinDex 官网？” If the user says no or does not answer, stop the submission flow and keep everything local. If the user says yes, continue to the separate disclosure and confirmation below; this first yes is interest, not upload consent.
 
 Be explicit when the generated preview contains layout, character, animation, or pet concepts that the current native color adapter cannot install.
 
-## Submit a generated theme to Theme Hub
+## Submit a generated theme to SkinDex
 
-Before uploading anything, show the user exactly what will be sent: theme name, author label, palette, notes, and the review thumbnail (maximum 700 KB). State that the queue is private, the submission is not public, and only an approved theme can enter the website catalog. Then ask: “确认把以上内容上传到 Theme Hub 审核队列吗？”
+Before uploading anything, show the user exactly what will be sent: theme name, author label, palette, notes, and the review thumbnail (maximum 700 KB). State that the queue is private, the submission is not public, and only an approved theme can enter the website catalog. Then ask: “确认把以上内容上传到 SkinDex 审核队列吗？”
 
 Only after an unambiguous yes, run:
 
@@ -81,4 +81,4 @@ Never report a restore as complete until the user confirms the visual change.
 - Reject commands, scripts, hooks, executable paths, non-HTTPS package URLs, and remote packages without SHA-256 integrity.
 - Do not patch the Codex application bundle, enable a debugging endpoint, or require App Manager.
 
-Use `--state-root <path>` only for tests or an explicitly requested custom location. Use `--endpoint <https-origin>` only for testing another Theme Hub deployment.
+Use `--state-root <path>` only for tests or an explicitly requested custom location. Use `--endpoint <https-origin>` only for testing another SkinDex deployment.

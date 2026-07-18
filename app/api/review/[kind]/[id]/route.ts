@@ -72,7 +72,7 @@ export async function POST(request: Request, context: RouteContext) {
   const requestOrigin = new URL(request.url).origin;
   const now = new Date().toISOString();
   const tags = JSON.stringify([proposal.sourceType === "reference-image" ? "参考图生成" : "用户生成", "社区投稿", "原生导入"]);
-  const description = proposal.notes || "由 Theme Hub 用户生成并经所有者审核通过的社区主题。";
+  const description = proposal.notes || "由 SkinDex 用户生成并经所有者审核通过的社区主题。";
 
   await getD1().batch([
     getD1().prepare(`INSERT INTO themes (
@@ -93,7 +93,7 @@ export async function POST(request: Request, context: RouteContext) {
         `${requestOrigin}/api/theme-proposals/${proposal.id}/preview`,
         `${requestOrigin}/#themes`,
         `${requestOrigin}/#themes`,
-        "Theme Hub Community",
+        "SkinDex Community",
         `theme-hub/community/${proposal.id}`,
         0,
         "用户投稿 · 权利归投稿者",

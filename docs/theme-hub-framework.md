@@ -1,4 +1,4 @@
-# Codex Theme Hub 产品框架
+# SkinDex 产品框架
 
 ## 产品分工
 

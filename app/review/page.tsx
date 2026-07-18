@@ -28,7 +28,7 @@ export default async function ReviewPage() {
       <main className="review-denied">
         <div>
           <h1>这个账号没有审核权限</h1>
-          <p>Theme Hub 审核后台目前只允许站点所有者账号访问。你可以退出后换用被授权的 ChatGPT 账号。</p>
+          <p>SkinDex 审核后台目前只允许站点所有者账号访问。你可以退出后换用被授权的 ChatGPT 账号。</p>
           <a href={chatGPTSignOutPath("/review")}>退出并重新登录</a>
         </div>
       </main>
@@ -45,7 +45,7 @@ export default async function ReviewPage() {
   return (
     <main className="review-shell">
       <header className="review-topbar">
-        <Link className="review-brand" href="/"><span>C</span>Codex Theme Hub</Link>
+        <Link className="review-brand" href="/"><span>S</span>SkinDex</Link>
         <nav><span>{user.displayName}</span><a href={chatGPTSignOutPath("/")}>退出审核账号</a></nav>
       </header>
 

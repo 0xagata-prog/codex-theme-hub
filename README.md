@@ -1,8 +1,8 @@
-# Codex Theme Hub
+# SkinDex
 
-Codex 主题与皮肤聚合目录，以及当前可独立安装的 `$theme-hub` 对话 Skill。
+Codex 口袋皮肤图鉴：聚合、发现、生成和安全导入主题，并继续通过兼容命令 `$theme-hub` 提供对话能力。
 
-公开站点：<https://codex-theme-hub-cn.jyyang040703.chatgpt.site/>
+当前兼容地址（等待绑定 SkinDex 自定义域名）：<https://codex-theme-hub-cn.jyyang040703.chatgpt.site/>
 
 GitHub 源码：<https://github.com/0xagata-prog/codex-theme-hub>
 
@@ -40,7 +40,7 @@ $theme-hub 参考我发的图片生成一个原创主题。
 
 当前 Skill 不需要单独连接 GPT API。`.codexskin` 与 Codex Styler 适配器尚未开放；它们只展示可追溯来源，不作为一键安装入口。
 
-安装 Theme Hub 一次后，官网的原生主题卡会直接打开带 `theme_hub_request` 的 Codex 任务。Skill 获取官方 Manifest、验证来源与兼容性、创建恢复点并暂存；最终外观导入仍由用户在 Codex 中确认。主题卡按 `native`、`partial` 和 `adapter-pending` 三个支持等级分流。
+安装 SkinDex Skill 一次后，官网的原生主题卡会直接打开带 `theme_hub_request` 的 Codex 任务。Skill 获取官方 Manifest、验证来源与兼容性、创建恢复点并暂存；最终外观导入仍由用户在 Codex 中确认。主题卡按 `native`、`partial` 和 `adapter-pending` 三个支持等级分流。
 
 ## 发布 Skill
 

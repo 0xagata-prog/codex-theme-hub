@@ -58,7 +58,7 @@ test("keeps every submission private until review approval", async () => {
   assert.match(policy, /status === APPROVED_THEME_STATUS/);
   assert.match(themesRoute, /isPublicThemeStatus\(theme\.status\)/);
   assert.match(themesRoute, /eq\(themes\.status, APPROVED_THEME_STATUS\)/);
-  assert.match(skill, /这个主题已经保存在本地，要不要投稿到 Theme Hub 官网/);
+  assert.match(skill, /这个主题已经保存在本地，要不要投稿到 SkinDex 官网/);
   assert.match(skill, /this first yes is interest, not upload consent/);
   assert.match(script, /publication: "review-required"/);
 });

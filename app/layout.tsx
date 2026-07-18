@@ -18,8 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
   const origin = host ? `${protocol}://${host}` : "https://codex-theme-hub-cn.jyyang040703.chatgpt.site";
-  const title = "Codex Theme Hub — 真实主题，直接使用";
-  const description = "浏览真实 Codex 社区主题，通过 $theme-hub Skill 推荐、生成并安全导入兼容主题。";
+  const title = "SkinDex — Codex 口袋皮肤图鉴";
+  const description = "在 SkinDex 发现、收藏和安全导入真实 Codex 社区主题，也可以通过 $theme-hub Skill 生成并投稿自己的皮肤。";
 
   return {
     title,
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       type: "website",
       url: origin,
-      images: [{ url: `${origin}/og.png`, width: 1672, height: 941, alt: "Codex Theme Hub — 真实主题，直接使用" }],
+      images: [{ url: `${origin}/og.png`, width: 1672, height: 941, alt: "SkinDex — Codex 口袋皮肤图鉴" }],
     },
     twitter: {
       card: "summary_large_image",

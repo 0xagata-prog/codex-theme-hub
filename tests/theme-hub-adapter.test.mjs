@@ -34,7 +34,7 @@ test("validates and plans a native data-only theme", async () => {
   assert.equal(plan.mutatesCodexBundle, false);
 });
 
-test("validates every bundled Theme Hub catalog manifest", async () => {
+test("validates every bundled SkinDex catalog manifest", async () => {
   const catalogUrl = new URL("../plugins/codex-theme-hub/catalog/", import.meta.url);
   const manifests = (await readdir(catalogUrl)).filter((name) => name.endsWith(".json"));
   assert.ok(manifests.length >= 2);
@@ -91,7 +91,7 @@ test("stages, confirms, and resolves a restore point in managed storage", async 
   assert.match(await readFile(restore.payloadPath, "utf8"), /#18382B/);
 });
 
-test("uses the official default when no prior Theme Hub theme exists", async () => {
+test("uses the official default when no prior SkinDex theme exists", async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), "codex-theme-hub-test-"));
   const staged = await stageManifest(await sampleManifest(), { stateRoot });
   const restore = await restorePlan(staged.transactionId, { stateRoot });
@@ -157,7 +157,7 @@ test("verifies declared image types by file signature", () => {
   assert.equal(matchesImageSignature("image/png", new TextEncoder().encode("<script>alert(1)</script>")), false);
 });
 
-test("marks consented proposal requests as Theme Hub Skill traffic", async () => {
+test("marks consented proposal requests as SkinDex Skill traffic", async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), "theme-hub-submit-test-"));
   const previewPath = path.join(stateRoot, "preview.png");
   await writeFile(previewPath, Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));

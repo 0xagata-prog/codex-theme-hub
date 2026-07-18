@@ -73,7 +73,7 @@ function skillChatUrl(prompt: string) {
 }
 
 function skillInstallerChatUrl() {
-  return codexPromptUrl(`请帮我安装官方 Theme Hub Skill。
+  return codexPromptUrl(`请帮我安装官方 SkinDex Skill（兼容命令为 $theme-hub）。
 唯一可信来源：${githubRepoUrl}
 最新安装包：${skillBundleUrl}
 目标目录：macOS / Linux 使用 $HOME/.agents/skills/theme-hub；Windows 使用 %USERPROFILE%\\.agents\\skills\\theme-hub。
@@ -119,8 +119,8 @@ function getInstallGuide(theme: Theme): InstallGuide {
       buttonLabel: "查看兼容状态",
       eyebrow: ".CODEXSKIN · ADAPTER PENDING",
       title: `${theme.name} 暂未开放一键导入`,
-      description: "Theme Hub 已识别这个 .codexskin 来源，但当前 Skill 还没有经过验证、可回滚的运行时适配器，因此不会替你执行第三方安装器或修改 Codex。",
-      steps: ["先查看原仓库的格式与许可说明", "等待 Theme Hub 发布可信适配器", "适配器可用前继续保留当前 Codex 主题"],
+      description: "SkinDex 已识别这个 .codexskin 来源，但当前 Skill 还没有经过验证、可回滚的运行时适配器，因此不会替你执行第三方安装器或修改 Codex。",
+      steps: ["先查看原仓库的格式与许可说明", "等待 SkinDex 发布可信适配器", "适配器可用前继续保留当前 Codex 主题"],
       primaryUrl: theme.sourceUrl,
       primaryLabel: "查看格式仓库 ↗",
       secondaryUrl: theme.downloadUrl,
@@ -136,8 +136,8 @@ function getInstallGuide(theme: Theme): InstallGuide {
     buttonLabel: "查看兼容状态",
     eyebrow: "CODEX STYLER · ADAPTER PENDING",
     title: `${theme.name} 暂未开放一键导入`,
-    description: "这类场景主题依赖第三方 Codex Styler。当前 Theme Hub Skill 只展示可追溯来源，不直接分发或执行未签名安装器。",
-    steps: ["先查看原项目的能力、许可和风险说明", "等待 Theme Hub 发布可信适配器", "适配器可用前不要把“查看来源”当作一键安装"],
+    description: "这类场景主题依赖第三方 Codex Styler。当前 SkinDex Skill 只展示可追溯来源，不直接分发或执行未签名安装器。",
+    steps: ["先查看原项目的能力、许可和风险说明", "等待 SkinDex 发布可信适配器", "适配器可用前不要把“查看来源”当作一键安装"],
     primaryUrl: theme.sourceUrl,
     primaryLabel: "查看源仓库 ↗",
     secondaryUrl: theme.downloadUrl,
@@ -351,7 +351,7 @@ export default function Home() {
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Codex Theme Hub 首页"><span>C</span><strong>Codex Theme Hub</strong></a>
+        <a className="brand" href="#top" aria-label="SkinDex 首页"><span>S</span><strong>SkinDex</strong></a>
         <nav aria-label="主导航"><a href="#skill">主题 Skill</a><a href="#themes">真实主题</a><a href="#sources">数据来源</a><button onClick={() => setSubmitOpen(true)}>投稿</button></nav>
         <button className="submit-nav" onClick={() => setSkillInstallOpen(true)}>在 Codex 中安装 <span>↗</span></button>
       </header>
@@ -360,9 +360,9 @@ export default function Home() {
         <div className="hero-copy">
           <div className="hero-label"><span>LIVE CATALOG</span><i>●</i> 公开来源 · 持久数据</div>
           <h1>真实主题，<br /><em>真实来源。</em></h1>
-          <p>官网负责发现和创作，Theme Hub Skill 负责在 Codex 里对话切换。你也可以发一张图片，让它生成主题并在确认后提交回官网审核。</p>
+          <p>SkinDex 是你的 Codex 口袋皮肤图鉴：官网负责发现和创作，兼容命令 <b>$theme-hub</b> 的 Skill 负责在 Codex 里对话切换。</p>
           <div className="hero-actions">
-            <button onClick={() => setSkillInstallOpen(true)}>在 Codex 中安装 Theme Hub <span>→</span></button>
+            <button onClick={() => setSkillInstallOpen(true)}>在 Codex 中安装 SkinDex <span>→</span></button>
             <a href="#themes">先浏览主题 ↓</a>
           </div>
           <form className="hero-search" onSubmit={(event) => event.preventDefault()}>
@@ -388,7 +388,7 @@ export default function Home() {
             </div>
           </div>
           <div className="floating-chip chip-one"><b>GitHub</b> 来源可追溯</div>
-          <div className="floating-chip chip-two"><span>●</span> {featured?.sourceName === "Theme Hub Lab" ? "参考图同人创作" : "预览来自原仓库"}</div>
+          <div className="floating-chip chip-two"><span>●</span> {featured?.sourceName === "SkinDex Lab" ? "参考图同人创作" : "预览来自原仓库"}</div>
         </div>
       </section>
 
@@ -402,14 +402,14 @@ export default function Home() {
             <span>只需安装一次 · 以后主题直接从官网打开</span>
           </div>
         </div>
-        <div className="conversation-grid" aria-label="Theme Hub Skill 可以完成的对话">
+        <div className="conversation-grid" aria-label="SkinDex Skill 可以完成的对话">
           <a href={skillChatUrl("把官网的蓝色信使 2007 配色应用到 Codex，并先创建恢复点。")}>
             <span>01 / SWITCH</span><strong>“换成官网这个皮肤”</strong><p>读取官网 Manifest、检查兼容性、应用主题并保留恢复点。</p><b>开始对话 ↗</b>
           </a>
           <a href={skillChatUrl("我会发一张参考图片，请帮我生成一个原创 Codex 主题和预览。")}>
             <span>02 / CREATE</span><strong>“参考这张图做一个”</strong><p>分析视觉语言、生成原创预览、提取配色并先保存在本地。</p><b>开始对话 ↗</b>
           </a>
-          <a href={skillChatUrl("把刚生成的主题提交到 Theme Hub；上传前先告诉我会公开哪些内容并等待确认。")}>
+          <a href={skillChatUrl("把刚生成的主题提交到 SkinDex；上传前先告诉我会公开哪些内容并等待确认。")}>
             <span>03 / SUBMIT</span><strong>“做完后要不要投稿？”</strong><p>Skill 会主动询问一次；你表示愿意后，仍会展示上传内容并等待最终确认。</p><b>开始对话 ↗</b>
           </a>
         </div>
@@ -443,13 +443,13 @@ export default function Home() {
       <section className="sources-section" id="sources">
         <div className="market-heading">
           <div><span className="section-index">03 / SOURCES</span><h2>主题来源</h2></div>
-          <p>公开项目保留原仓库链接；参考图生成主题由 Theme Hub Lab 提炼原创预览与可导入配色。</p>
+          <p>公开项目保留原仓库链接；参考图生成主题由 SkinDex Lab 提炼原创预览与可导入配色。</p>
         </div>
         <div className="source-grid">
           <a href="https://github.com/robinli/codex-material-themes" target="_blank" rel="noreferrer"><span>01</span><h3>Codex Material Themes</h3><p>12 款可通过 codex-theme-v1 导入的材质配色主题。</p><b>打开 GitHub ↗</b></a>
           <a href="https://github.com/xuhuanstudio/codex-styler" target="_blank" rel="noreferrer"><span>02</span><h3>Codex Styler</h3><p>开源主题编辑器、场景皮肤与互动伙伴系统。</p><b>打开 GitHub ↗</b></a>
           <a href="https://github.com/Wangnov/awesome-codex-skins" target="_blank" rel="noreferrer"><span>03</span><h3>Awesome Codex Skins</h3><p>.codexskin 标准、认证注册表和真实应用截图。</p><b>打开 GitHub ↗</b></a>
-          <a href="#themes"><span>04</span><h3>Theme Hub Lab</h3><p>把用户参考图转化为原创主题概念、预览和可导入配色。</p><b>查看实验主题 ↑</b></a>
+          <a href="#themes"><span>04</span><h3>SkinDex Lab</h3><p>把用户参考图转化为原创主题概念、预览和可导入配色。</p><b>查看实验主题 ↑</b></a>
         </div>
         {syncedAt && <p className="sync-note">数据库响应时间：{new Date(syncedAt).toLocaleString("zh-CN")} · 元数据更新以源仓库为准</p>}
       </section>
@@ -461,7 +461,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <a className="brand footer-brand" href="#top"><span>C</span><strong>Codex Theme Hub</strong></a>
+        <a className="brand footer-brand" href="#top"><span>S</span><strong>SkinDex</strong></a>
         <p>公开浏览 · 来源可追溯 · 不强绑 ChatGPT 登录</p>
         <div><a href="#skill">安装 Skill</a><a href="#sources">数据来源</a><a href="#creators">提交主题</a><a href="#top">回到顶部 ↑</a></div>
       </footer>

@@ -1,4 +1,4 @@
-name: Release Theme Hub Skill
+name: Release SkinDex Skill
 
 on:
   push:
@@ -29,5 +29,5 @@ jobs:
           if gh release view "$TAG"; then
             gh release upload "$TAG" theme-hub-skill.zip --clobber
           else
-            gh release create "$TAG" theme-hub-skill.zip --generate-notes --title "Theme Hub Skill $TAG"
+            gh release create "$TAG" theme-hub-skill.zip --generate-notes --title "SkinDex Skill $TAG"
           fi

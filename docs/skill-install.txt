@@ -1,6 +1,6 @@
-Codex Theme Hub Skill 引导式安装
+SkinDex Skill 引导式安装（兼容命令：$theme-hub）
 
-推荐：在官网点击“在 Codex 中安装 Theme Hub”。Codex 会检查官方来源、现有版本和目标目录，等待用户确认后再写入。
+推荐：在官网点击“在 Codex 中安装 SkinDex”。Codex 会检查官方来源、现有版本和目标目录，等待用户确认后再写入。
 
 手动备用流程：
 

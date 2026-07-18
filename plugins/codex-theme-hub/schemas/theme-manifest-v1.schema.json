@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Codex Theme Hub Manifest v1",
+  "title": "SkinDex Theme Manifest v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
