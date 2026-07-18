@@ -12,6 +12,11 @@ test("keeps guided installation in Codex with GitHub as the fallback source", as
   ]);
 
   assert.match(page, /function skillInstallerChatUrl\(\)/);
+  assert.match(page, /SKINDEX_SKILL_READY_KEY/);
+  assert.match(page, /还没安装：安装 SkinDex/);
+  assert.match(page, /我已安装：在 Codex 中打开主题/);
+  assert.match(page, /若不存在，立即停止/);
+  assert.match(page, /不要读取项目文件，不要搜索网页/);
   assert.match(page, /在 Codex 中开始安装/);
   assert.match(page, /等待我确认后再安装/);
   assert.match(page, /\$HOME\/\.agents\/skills\/theme-hub/);
@@ -33,7 +38,8 @@ test("routes theme actions through declared support levels", async () => {
   assert.match(capability, /"native" \| "partial" \| "adapter-pending"/);
   assert.match(capability, /action: "guided-import"/);
   assert.match(capability, /action: "view-source"/);
-  assert.match(page, /href=\{themeUseChatUrl\(theme\)\}/);
+  assert.match(page, /requestThemeUse\(theme\)/);
+  assert.doesNotMatch(page, /href=\{themeUseChatUrl\(theme\)\}/);
   assert.match(page, /theme_hub_request=/);
   assert.match(page, /适配器开发中/);
   assert.match(skill, /`verified`, `staged`, `awaiting-confirmation`, or `confirmed`/);

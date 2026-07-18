@@ -63,13 +63,17 @@ const filters = ["全部", "桌面端", "CLI", "深色", "浅色", "双模式"] 
 const githubRepoUrl = "https://github.com/0xagata-prog/codex-theme-hub";
 const skillBundleUrl = `${githubRepoUrl}/releases/latest/download/theme-hub-skill.zip`;
 const themeHubOrigin = "https://codex-theme-hub-cn.jyyang040703.chatgpt.site";
+const SKINDEX_SKILL_READY_KEY = "skindex-skill-ready-v1";
 
 function codexPromptUrl(prompt: string) {
   return `codex://new?prompt=${encodeURIComponent(prompt)}`;
 }
 
 function skillChatUrl(prompt: string) {
-  return codexPromptUrl(`$theme-hub ${prompt}`);
+  return codexPromptUrl(`先检查当前已安装技能列表中是否存在 theme-hub（显示名可能是 SkinDex）。
+若不存在，立即停止：不要读取项目文件，不要搜索网页，不要请求 Manifest，不要创建恢复点，也不要尝试自行兼容。只回复“尚未安装 SkinDex，请先回官网完成安装，并在安装后开启新对话”。
+只有确认 theme-hub 已安装时，才调用 $theme-hub 执行以下请求：
+${prompt}`);
 }
 
 function skillInstallerChatUrl() {
@@ -77,7 +81,8 @@ function skillInstallerChatUrl() {
 唯一可信来源：${githubRepoUrl}
 最新安装包：${skillBundleUrl}
 目标目录：macOS / Linux 使用 $HOME/.agents/skills/theme-hub；Windows 使用 %USERPROFILE%\\.agents\\skills\\theme-hub。
-安装前请先检查来源、压缩包结构和 SKILL.md；如果目标目录已存在，先比较版本并说明如何备份。告诉我将写入哪些文件，等待我确认后再安装。不要执行主题包里的任何命令。完成后验证 Skill 结构，并提醒我开启新对话再使用 $theme-hub。`);
+这是用户级 Skill 安装，当前项目目录为空也不影响安装；不要搜索项目交接文件，也不要读取任何主题 Manifest。
+安装前请先检查来源、压缩包结构和 SKILL.md；如果目标目录已存在，先比较版本并说明如何备份。告诉我将写入哪些文件，等待我确认后再安装。不要执行主题包里的任何命令。完成后验证 Skill 结构，并明确回复“安装完成，请开启新对话后再使用 $theme-hub”。`);
 }
 
 function themeUseChatUrl(theme: Theme) {
@@ -160,12 +165,14 @@ function ThemePreview({ theme, large = false }: { theme: Theme; large?: boolean 
 function ThemeCard({
   theme,
   saved,
+  skillReady,
   onSave,
   onOpen,
   onUse,
 }: {
   theme: Theme;
   saved: boolean;
+  skillReady: boolean;
   onSave: () => void;
   onOpen: () => void;
   onUse: () => void;
@@ -206,7 +213,7 @@ function ThemeCard({
           {theme.tags.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
         {installGuide.canUseInCodex ? (
-          <a className="use-now-button" href={themeUseChatUrl(theme)}>{installGuide.buttonLabel}<span>→</span></a>
+          <button className="use-now-button" onClick={onUse}>{skillReady ? installGuide.buttonLabel : "安装 SkinDex 后使用"}<span>→</span></button>
         ) : (
           <button className="use-now-button is-pending" onClick={onUse}>{installGuide.buttonLabel}<span>→</span></button>
         )}
@@ -232,6 +239,8 @@ export default function Home() {
   const [selected, setSelected] = useState<Theme | null>(null);
   const [installTheme, setInstallTheme] = useState<Theme | null>(null);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const [skillReady, setSkillReady] = useState(false);
+  const [pendingTheme, setPendingTheme] = useState<Theme | null>(null);
   const [skillInstallOpen, setSkillInstallOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -243,6 +252,7 @@ export default function Home() {
         const stored = window.localStorage.getItem("codex-theme-hub-saved");
         const parsed = stored ? JSON.parse(stored) : [];
         setSaved(Array.isArray(parsed) ? parsed.map(String) : []);
+        setSkillReady(window.localStorage.getItem(SKINDEX_SKILL_READY_KEY) === "confirmed");
       } catch {
         window.localStorage.removeItem("codex-theme-hub-saved");
       }
@@ -298,6 +308,28 @@ export default function Home() {
     setSelected(null);
     setInstallTheme(theme);
     setCopyState("idle");
+  };
+
+  const requestThemeUse = (theme: Theme) => {
+    setSelected(null);
+    if (!skillReady) {
+      setPendingTheme(theme);
+      return;
+    }
+    window.location.assign(themeUseChatUrl(theme));
+  };
+
+  const confirmSkillReady = (theme?: Theme | null) => {
+    window.localStorage.setItem(SKINDEX_SKILL_READY_KEY, "confirmed");
+    setSkillReady(true);
+    setPendingTheme(null);
+    setSkillInstallOpen(false);
+    if (theme) window.location.assign(themeUseChatUrl(theme));
+  };
+
+  const resetSkillReady = () => {
+    window.localStorage.removeItem(SKINDEX_SKILL_READY_KEY);
+    setSkillReady(false);
   };
 
   const copyThemeSetting = async (value: string) => {
@@ -433,7 +465,7 @@ export default function Home() {
           <div className="empty-state"><span>!</span><h3>目录暂时不可用</h3><p>{loadError}</p><button onClick={() => window.location.reload()}>重新加载</button></div>
         ) : visibleThemes.length > 0 ? (
           <div className="theme-grid">
-            {visibleThemes.map((theme) => <ThemeCard key={theme.id} theme={theme} saved={saved.includes(theme.id)} onSave={() => toggleSaved(theme.id)} onOpen={() => setSelected(theme)} onUse={() => openInstall(theme)} />)}
+            {visibleThemes.map((theme) => <ThemeCard key={theme.id} theme={theme} saved={saved.includes(theme.id)} skillReady={skillReady} onSave={() => toggleSaved(theme.id)} onOpen={() => setSelected(theme)} onUse={() => getInstallGuide(theme).canUseInCodex ? requestThemeUse(theme) : openInstall(theme)} />)}
           </div>
         ) : (
           <div className="empty-state"><span>⌕</span><h3>没有找到对应主题</h3><p>换个关键词，或清除当前筛选条件。</p><button onClick={() => { setQuery(""); setFilter("全部"); }}>查看全部主题</button></div>
@@ -484,7 +516,7 @@ export default function Home() {
               </div>
               <div className="detail-actions">
                 {getInstallGuide(selected).canUseInCodex ? (
-                  <a className="primary-action" href={themeUseChatUrl(selected)}>在 Codex 中使用 →</a>
+                  <button className="primary-action" onClick={() => requestThemeUse(selected)}>{skillReady ? "在 Codex 中使用" : "安装 SkinDex 后使用"} →</button>
                 ) : (
                   <button className="primary-action" onClick={() => openInstall(selected)}>查看兼容状态 →</button>
                 )}
@@ -505,9 +537,7 @@ export default function Home() {
               <h2 id="install-title">{guide.title}</h2>
               <p>{guide.description}</p>
               {guide.canUseInCodex && (
-                <a className="skill-use-link" href={themeUseChatUrl(installTheme)}>
-                  在 Codex 中验证并暂存 →
-                </a>
+                <button className="skill-use-link" onClick={() => requestThemeUse(installTheme)}>{skillReady ? "在 Codex 中验证并暂存" : "安装 SkinDex 后继续"} →</button>
               )}
               <ol className="install-steps">
                 {guide.steps.map((step, index) => <li key={step}><span>0{index + 1}</span><p>{step}</p></li>)}
@@ -532,6 +562,22 @@ export default function Home() {
         );
       })()}
 
+      {pendingTheme && !skillInstallOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setPendingTheme(null)}>
+          <section className="skill-gate-modal" role="dialog" aria-modal="true" aria-labelledby="skill-gate-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setPendingTheme(null)} aria-label="关闭 SkinDex 安装确认">×</button>
+            <span className="section-index">FIRST USE · INSTALL CHECK</span>
+            <h2 id="skill-gate-title">使用主题前，先确认 SkinDex</h2>
+            <p>官网无法读取你电脑上的 Codex 技能列表。未安装时直接打开主题，会让 Codex 无效搜索并浪费时间；请选择你的真实状态。</p>
+            <div className="skill-gate-options">
+              <button className="install-primary" onClick={() => setSkillInstallOpen(true)}>还没安装：安装 SkinDex →</button>
+              <button className="install-secondary" onClick={() => confirmSkillReady(pendingTheme)}>我已安装：在 Codex 中打开主题 →</button>
+            </div>
+            <p className="install-source">当前主题：<b>{pendingTheme.name}</b>。只有你确认已安装后，官网才会打开主题任务。</p>
+          </section>
+        </div>
+      )}
+
       {skillInstallOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setSkillInstallOpen(false)}>
           <section className="skill-install-modal" role="dialog" aria-modal="true" aria-labelledby="skill-install-title" onMouseDown={(event) => event.stopPropagation()}>
@@ -552,6 +598,8 @@ export default function Home() {
               <a className="install-primary" href={skillInstallerChatUrl()}>在 Codex 中开始安装 →</a>
               <a className="install-secondary" href={skillBundleUrl}>手动下载 Skill ↓</a>
             </div>
+            {pendingTheme && <button className="skill-ready-confirm" onClick={() => confirmSkillReady(pendingTheme)}>我已安装：在 Codex 中打开主题 →</button>}
+            {skillReady && !pendingTheme && <button className="skill-reset-button" onClick={resetSkillReady}>这台设备找不到 Skill？重新进入安装流程</button>}
             <p className="install-source">唯一发布源：<a href={githubRepoUrl} target="_blank" rel="noreferrer">GitHub 源码与 Releases ↗</a>。安装后开启新对话，再输入：$theme-hub 帮我从官网挑一个主题。</p>
           </section>
         </div>
