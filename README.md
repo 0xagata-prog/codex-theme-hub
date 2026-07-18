@@ -44,3 +44,7 @@ npm run test:skindex
 ```
 
 推送 `v*` 标签后，GitHub Actions 会把 [skill](skill) 打包为 `skindex-skill.zip` 并创建 Release。
+
+## 许可与安全
+
+项目代码采用 [Apache-2.0](LICENSE) 许可；第三方主题、预览和角色素材继续遵循各自来源声明，不自动转为 Apache-2.0。安全问题请使用 GitHub 仓库的私密 **Security → Report a vulnerability** 渠道，具体范围见 [.github/SECURITY.md](.github/SECURITY.md)。
