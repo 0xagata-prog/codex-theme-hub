@@ -22,6 +22,7 @@ jobs:
       - name: Verify source before packaging
         run: |
           npm ci
+          npm run audit:production
           npm run typecheck
           npm run test:skindex
           npm test
