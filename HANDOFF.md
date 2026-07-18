@@ -17,6 +17,7 @@ app/globals.css
 app/layout.tsx
 app/api/submissions/route.ts
 app/api/theme-proposals/route.ts
+app/downloads/codex-theme-hub-plugin.zip/route.ts
 lib/image-security.ts
 plugins/codex-theme-hub/skills/theme-hub/SKILL.md
 plugins/codex-theme-hub/skills/theme-hub/references/deep-link-v1.md
