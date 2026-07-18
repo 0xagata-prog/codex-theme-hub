@@ -10,6 +10,7 @@ type NativeThemeInput = {
   sourceUrl: string;
   license: string;
   updatedAt: string;
+  sourceRepo?: string;
 };
 
 const semanticColors: Record<string, { diffAdded: string; diffRemoved: string; skill: string }> = {
@@ -75,6 +76,8 @@ export function buildThemeManifest(theme: NativeThemeInput, origin: string) {
     },
     install: {
       adapter: "codex-native-v1",
+      experience: "guided-import",
+      supportLevel: theme.sourceRepo === "theme-hub/lab" ? "partial" : "native",
       requiresUserConfirmation: true,
       rollback: "restore-point",
     },

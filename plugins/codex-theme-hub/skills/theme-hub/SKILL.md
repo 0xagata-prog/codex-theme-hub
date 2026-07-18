@@ -27,7 +27,7 @@ Run:
 node scripts/theme-hub.mjs catalog --query "用户关键词"
 ```
 
-Explain which results support native import and which are preview-only or require an unavailable adapter. Do not invent download counts, licenses, compatibility, or availability.
+Use each result's `install.supportLevel` and `install.action` when available. Explain which results support guided native import, which only import part of the visual concept, and which require an unavailable adapter. Do not invent download counts, licenses, compatibility, or availability.
 
 ## Install or switch
 
@@ -38,7 +38,7 @@ Explain which results support native import and which are preview-only or requir
 5. Run `node scripts/theme-hub.mjs copy --transaction <id>` and ask the user to paste it in **Codex → Settings → Appearance → Import**. A website or Skill prompt cannot silently change Codex appearance.
 6. After the user confirms the visual change, run `node scripts/theme-hub.mjs confirm --transaction <id>`.
 
-An explicit “install and apply” prompt authorizes validation and staging of the selected data-only theme. It does not remove the final Codex import confirmation.
+An explicit “install and apply” prompt authorizes validation and staging of the selected data-only theme. It does not remove the final Codex import confirmation. Report the state as `verified`, `staged`, `awaiting-confirmation`, or `confirmed`; never call staging a completed installation.
 
 ## Create from an image
 

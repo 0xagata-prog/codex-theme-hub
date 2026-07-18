@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { matchesImageSignature } from "../lib/image-security.ts";
+import { getThemeInstallability } from "../lib/theme-capability.ts";
 
 import {
   confirmTransaction,
@@ -114,13 +115,26 @@ test("creates a valid local theme manifest from generated colors", () => {
 
 test("queries the live catalog shape without inventing install support", async () => {
   const fetchImpl = async () => Response.json({ themes: [
-    { id: "native-blue", name: "Native Blue", description: "calm blue", mode: "浅色", platform: "桌面端", tags: ["蓝色"], verifiedVersion: "codex-theme-v1", sourceName: "Lab" },
-    { id: "pet-scene", name: "Pet Scene", description: "animated pet", mode: "深色", platform: "桌面端", tags: ["伙伴"], verifiedVersion: "preview-only", sourceName: "Community" },
+    { id: "native-blue", name: "Native Blue", description: "calm blue", mode: "浅色", platform: "桌面端", tags: ["蓝色"], verifiedVersion: "codex-theme-v1", sourceName: "Lab", install: { supportLevel: "native", action: "guided-import" } },
+    { id: "pet-scene", name: "Pet Scene", description: "animated pet", mode: "深色", platform: "桌面端", tags: ["伙伴"], verifiedVersion: "preview-only", sourceName: "Community", install: { supportLevel: "adapter-pending", action: "view-source" } },
   ] });
   const result = await catalogThemes({ query: "blue", fetchImpl });
   assert.equal(result.total, 1);
   assert.equal(result.themes[0].id, "native-blue");
   assert.equal(result.themes[0].nativeImport, true);
+  assert.deepEqual(result.themes[0].install, { supportLevel: "native", action: "guided-import" });
+});
+
+test("classifies catalog actions by verified adapter support", () => {
+  assert.deepEqual(getThemeInstallability({ sourceRepo: "robinli/codex-material-themes", verifiedVersion: "codex-theme-v1" }), {
+    supportLevel: "native",
+    adapter: "codex-native-v1",
+    action: "guided-import",
+    requiresUserConfirmation: true,
+    rollback: "restore-point",
+  });
+  assert.equal(getThemeInstallability({ sourceRepo: "theme-hub/lab", verifiedVersion: "codex-theme-v1" }).supportLevel, "partial");
+  assert.equal(getThemeInstallability({ sourceRepo: "Wangnov/awesome-codex-skins", verifiedVersion: "codexskin-v1" }).action, "view-source");
 });
 
 test("refuses generated-theme upload without explicit consent", async () => {

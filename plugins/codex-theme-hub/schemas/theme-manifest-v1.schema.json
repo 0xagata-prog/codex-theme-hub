@@ -110,6 +110,8 @@
       "required": ["adapter", "requiresUserConfirmation", "rollback"],
       "properties": {
         "adapter": { "enum": ["codex-native-v1", "codexskin-runtime-v1", "codex-styler-v1"] },
+        "experience": { "const": "guided-import" },
+        "supportLevel": { "enum": ["native", "partial", "adapter-pending"] },
         "requiresUserConfirmation": { "const": true },
         "rollback": { "const": "restore-point" }
       }

@@ -123,7 +123,7 @@ export function validateManifest(manifest) {
   rejectUnknownKeys(manifest.preview, new Set(["imageUrl"]), "preview", errors);
   rejectUnknownKeys(manifest.package, new Set(["format", "inline", "url", "integrity"]), "package", errors);
   rejectUnknownKeys(manifest.package?.integrity, new Set(["algorithm", "value"]), "package.integrity", errors);
-  rejectUnknownKeys(manifest.install, new Set(["adapter", "requiresUserConfirmation", "rollback"]), "install", errors);
+  rejectUnknownKeys(manifest.install, new Set(["adapter", "experience", "supportLevel", "requiresUserConfirmation", "rollback"]), "install", errors);
 
   if (manifest.schemaVersion !== "theme-hub/v1") errors.push("schemaVersion must be theme-hub/v1");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.id ?? "")) errors.push("id must be lowercase kebab-case");
@@ -159,6 +159,12 @@ export function validateManifest(manifest) {
   if (manifest.install?.adapter !== expectedAdapter) {
     errors.push(`install.adapter must be ${expectedAdapter ?? "a recognized adapter"} for ${format ?? "this format"}`);
   }
+  if (manifest.install?.experience !== undefined && manifest.install.experience !== "guided-import") {
+    errors.push("install.experience must be guided-import");
+  }
+  if (manifest.install?.supportLevel !== undefined && !["native", "partial", "adapter-pending"].includes(manifest.install.supportLevel)) {
+    errors.push("install.supportLevel is not recognized");
+  }
   if (manifest.install?.requiresUserConfirmation !== true) {
     errors.push("install.requiresUserConfirmation must be true");
   }
@@ -186,7 +192,7 @@ export function validateManifest(manifest) {
     errors.push("updatedAt must be an ISO date-time");
   }
   if (expectedAdapter && !AVAILABLE_ADAPTERS.has(expectedAdapter)) {
-    warnings.push(`${expectedAdapter} is recognized but unavailable in plugin v0.1.0`);
+    warnings.push(`${expectedAdapter} is recognized but unavailable in Theme Hub Skill v0.2.0`);
   }
 
   return { ok: errors.length === 0, errors, warnings };
@@ -256,7 +262,7 @@ async function writeJsonAtomic(filePath, value) {
 
 export async function stageManifest(manifest, { stateRoot = stateRootFromEnvironment(), now = () => new Date() } = {}) {
   const plan = planManifest(manifest, { stateRoot });
-  if (plan.status !== "ready") throw new Error(`${plan.adapter} is not available in plugin v0.1.0`);
+  if (plan.status !== "ready") throw new Error(`${plan.adapter} is not available in Theme Hub Skill v0.2.0`);
 
   const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
   const revision = sha256(manifestText);
@@ -438,6 +444,10 @@ export async function catalogThemes({ endpoint = DEFAULT_ENDPOINT, query = "", f
       platform: theme.platform,
       mode: theme.mode,
       nativeImport: String(theme.verifiedVersion ?? "").includes("codex-theme-v1"),
+      install: theme.install ?? {
+        supportLevel: String(theme.verifiedVersion ?? "").includes("codex-theme-v1") ? "native" : "adapter-pending",
+        action: String(theme.verifiedVersion ?? "").includes("codex-theme-v1") ? "guided-import" : "view-source",
+      },
       source: theme.sourceName,
     })),
   };
@@ -486,7 +496,13 @@ export function createLocalManifest({ id, name, author, surface, ink, accent, mo
         variant: mode,
       })}`,
     },
-    install: { adapter: "codex-native-v1", requiresUserConfirmation: true, rollback: "restore-point" },
+    install: {
+      adapter: "codex-native-v1",
+      experience: "guided-import",
+      supportLevel: "native",
+      requiresUserConfirmation: true,
+      rollback: "restore-point",
+    },
     updatedAt: now().toISOString(),
   };
   assertValid(manifest);

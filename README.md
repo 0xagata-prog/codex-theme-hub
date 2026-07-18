@@ -22,7 +22,7 @@ GitHub 源码：<https://github.com/0xagata-prog/codex-theme-hub>
 
 ## Skill 安装
 
-从 [GitHub Releases](https://github.com/0xagata-prog/codex-theme-hub/releases) 下载 `theme-hub-skill.zip`，解压后把完整的 `theme-hub` 文件夹放进用户 Skill 目录：
+官网主入口会打开一个预填好的 Codex 安装任务。Codex 先核验官方 GitHub Release、目标目录和现有版本，并在用户确认后安装。手动安装仍可从 [GitHub Releases](https://github.com/0xagata-prog/codex-theme-hub/releases) 下载 `theme-hub-skill.zip`，解压后把完整的 `theme-hub` 文件夹放进用户 Skill 目录：
 
 ```text
 macOS / Linux: ~/.agents/skills/theme-hub/SKILL.md
@@ -37,6 +37,8 @@ $theme-hub 参考我发的图片生成一个原创主题。
 ```
 
 当前 Skill 不需要单独连接 GPT API。`.codexskin` 与 Codex Styler 适配器尚未开放；它们只展示可追溯来源，不作为一键安装入口。
+
+安装 Theme Hub 一次后，官网的原生主题卡会直接打开带 `theme_hub_request` 的 Codex 任务。Skill 获取官方 Manifest、验证来源与兼容性、创建恢复点并暂存；最终外观导入仍由用户在 Codex 中确认。主题卡按 `native`、`partial` 和 `adapter-pending` 三个支持等级分流。
 
 ## 发布 Skill
 

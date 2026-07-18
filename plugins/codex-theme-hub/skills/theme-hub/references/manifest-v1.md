@@ -2,6 +2,8 @@
 
 Theme Hub manifests are declarative data. They describe provenance, compatibility, preview media, a package, and the adapter that may handle it. They never carry shell commands or executable installation scripts.
 
+`install.experience` may be `guided-import`. `install.supportLevel` is `native`, `partial`, or `adapter-pending`. Treat these as presentation and workflow hints; never let them bypass validation, confirmation, or adapter availability checks.
+
 The canonical JSON Schema is at `../../../schemas/theme-manifest-v1.schema.json` from this reference file. Validate every manifest with `scripts/theme-hub.mjs` because the runtime also enforces adapter-to-format matching and native payload structure.
 
 ## Supported formats

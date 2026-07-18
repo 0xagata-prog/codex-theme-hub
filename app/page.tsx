@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- previews are intentionally served by their source repositories */
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { getThemeInstallability, type ThemeSupportLevel } from "../lib/theme-capability";
 import { buildNativeThemePayload } from "../lib/theme-manifest";
 
 type Theme = {
@@ -25,6 +26,13 @@ type Theme = {
   verifiedVersion: string;
   featured: boolean;
   updatedAt: string;
+  install?: {
+    supportLevel: ThemeSupportLevel;
+    adapter: "codex-native-v1" | "codexskin-runtime-v1" | "codex-styler-v1";
+    action: "guided-import" | "view-source";
+    requiresUserConfirmation: true;
+    rollback: "restore-point" | "unavailable";
+  };
 };
 
 type CatalogResponse = {
@@ -45,31 +53,63 @@ type InstallGuide = {
   primaryLabel?: string;
   secondaryUrl?: string;
   secondaryLabel?: string;
+  canUseInCodex: boolean;
+  statusLabel: string;
+  supportLevel: ThemeSupportLevel;
 };
 
 const filters = ["全部", "桌面端", "CLI", "深色", "浅色", "双模式"] as const;
 
 const githubRepoUrl = "https://github.com/0xagata-prog/codex-theme-hub";
 const skillBundleUrl = `${githubRepoUrl}/releases/latest/download/theme-hub-skill.zip`;
+const themeHubOrigin = "https://codex-theme-hub-cn.jyyang040703.chatgpt.site";
+
+function codexPromptUrl(prompt: string) {
+  return `codex://new?prompt=${encodeURIComponent(prompt)}`;
+}
 
 function skillChatUrl(prompt: string) {
-  return `codex://new?prompt=${encodeURIComponent(`$theme-hub ${prompt}`)}`;
+  return codexPromptUrl(`$theme-hub ${prompt}`);
+}
+
+function skillInstallerChatUrl() {
+  return codexPromptUrl(`请帮我安装官方 Theme Hub Skill。
+唯一可信来源：${githubRepoUrl}
+最新安装包：${skillBundleUrl}
+目标目录：macOS / Linux 使用 $HOME/.agents/skills/theme-hub；Windows 使用 %USERPROFILE%\\.agents\\skills\\theme-hub。
+安装前请先检查来源、压缩包结构和 SKILL.md；如果目标目录已存在，先比较版本并说明如何备份。告诉我将写入哪些文件，等待我确认后再安装。不要执行主题包里的任何命令。完成后验证 Skill 结构，并提醒我开启新对话再使用 $theme-hub。`);
+}
+
+function themeUseChatUrl(theme: Theme) {
+  const request = JSON.stringify({
+    version: "1",
+    action: "install",
+    themeId: theme.id,
+    manifestUrl: `${themeHubOrigin}/api/themes?format=manifest&id=${encodeURIComponent(theme.id)}`,
+  });
+  return skillChatUrl(`请使用官网主题“${theme.name}”。
+theme_hub_request=${request}
+先验证 Manifest、来源、兼容性与适配器，再创建恢复点并暂存。最终导入必须等待我在 Codex 外观设置中确认；失败时不要改变当前主题。`);
 }
 
 function getInstallGuide(theme: Theme): InstallGuide {
-  if (theme.verifiedVersion.includes("codex-theme-v1")) {
-    const isLabConcept = theme.sourceRepo === "theme-hub/lab";
+  const install = theme.install ?? getThemeInstallability(theme);
+  if (install.action === "guided-import") {
+    const isLabConcept = install.supportLevel === "partial";
     const copyValue = buildNativeThemePayload(theme);
     return {
       kind: "copy",
-      buttonLabel: isLabConcept ? "导入概念配色" : "复制并导入",
+      buttonLabel: isLabConcept ? "在 Codex 中应用配色" : "在 Codex 中使用",
       eyebrow: isLabConcept ? "REFERENCE-TO-THEME LAB" : "CODEX NATIVE THEME",
-      title: `导入 ${theme.name}`,
+      title: `安全应用 ${theme.name}`,
       description: isLabConcept
         ? "这是从用户参考图提炼的原创概念主题。当前导入会应用冰蓝配色；复古三栏布局和机器人伙伴属于后续皮肤运行时，不会随原生配色一起安装。"
         : "这是 Codex 原生主题配置。网站可以帮你复制完整设置，但浏览器不能越过系统安全限制直接修改 Codex。",
-      steps: ["点击下方按钮复制完整主题设置", "打开 Codex → 设置 → 外观 → 导入", "粘贴设置并选择“导入主题”"],
+      steps: ["打开带主题 ID 的 Codex 任务", "Skill 验证 Manifest 并创建恢复点", "在 Codex 外观设置中确认最终导入"],
       copyValue,
+      canUseInCodex: true,
+      statusLabel: isLabConcept ? "仅配色可安全导入" : "可安全导入",
+      supportLevel: install.supportLevel,
     };
   }
 
@@ -85,6 +125,9 @@ function getInstallGuide(theme: Theme): InstallGuide {
       primaryLabel: "查看格式仓库 ↗",
       secondaryUrl: theme.downloadUrl,
       secondaryLabel: "查看原始 Release ↗",
+      canUseInCodex: false,
+      statusLabel: "适配器开发中",
+      supportLevel: "adapter-pending",
     };
   }
 
@@ -99,6 +142,9 @@ function getInstallGuide(theme: Theme): InstallGuide {
     primaryLabel: "查看源仓库 ↗",
     secondaryUrl: theme.downloadUrl,
     secondaryLabel: "查看原始 Release ↗",
+    canUseInCodex: false,
+    statusLabel: "适配器开发中",
+    supportLevel: "adapter-pending",
   };
 }
 
@@ -159,11 +205,15 @@ function ThemeCard({
         <div className="tag-row">
           {theme.tags.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
-        <button className="use-now-button" onClick={onUse}>{installGuide.buttonLabel}<span>→</span></button>
+        {installGuide.canUseInCodex ? (
+          <a className="use-now-button" href={themeUseChatUrl(theme)}>{installGuide.buttonLabel}<span>→</span></a>
+        ) : (
+          <button className="use-now-button is-pending" onClick={onUse}>{installGuide.buttonLabel}<span>→</span></button>
+        )}
         <div className="card-footer">
           <span>★ {theme.stars}</span>
           <span className="source-label">{theme.sourceName}</span>
-          <span className="compatibility">✓ {theme.verifiedVersion}</span>
+          <span className={`compatibility is-${installGuide.supportLevel}`}>{installGuide.supportLevel === "adapter-pending" ? "○" : "✓"} {installGuide.statusLabel}</span>
         </div>
       </div>
     </article>
@@ -296,7 +346,7 @@ export default function Home() {
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Codex Theme Hub 首页"><span>C</span><strong>Codex Theme Hub</strong></a>
         <nav aria-label="主导航"><a href="#skill">主题 Skill</a><a href="#themes">真实主题</a><a href="#sources">数据来源</a><button onClick={() => setSubmitOpen(true)}>投稿</button></nav>
-        <button className="submit-nav" onClick={() => setSkillInstallOpen(true)}>下载 Skill <span>↗</span></button>
+        <button className="submit-nav" onClick={() => setSkillInstallOpen(true)}>在 Codex 中安装 <span>↗</span></button>
       </header>
 
       <section className="hero real-hero" id="top">
@@ -305,8 +355,8 @@ export default function Home() {
           <h1>真实主题，<br /><em>真实来源。</em></h1>
           <p>官网负责发现和创作，Theme Hub Skill 负责在 Codex 里对话切换。你也可以发一张图片，让它生成主题并在确认后提交回官网审核。</p>
           <div className="hero-actions">
-            <button onClick={() => setSkillInstallOpen(true)}>下载 Theme Hub Skill <span>→</span></button>
-            <a href={skillChatUrl("帮我从官网挑一个适合长时间编码的主题。")}>打开 Codex 对话 ↗</a>
+            <button onClick={() => setSkillInstallOpen(true)}>在 Codex 中安装 Theme Hub <span>→</span></button>
+            <a href="#themes">先浏览主题 ↓</a>
           </div>
           <form className="hero-search" onSubmit={(event) => event.preventDefault()}>
             <label htmlFor="theme-search" className="sr-only">搜索主题、作者或仓库</label>
@@ -341,8 +391,8 @@ export default function Home() {
           <h2>装一次，之后直接和主题助手说话。</h2>
           <p>当前直接安装 <b>$theme-hub</b> Skill：官网是实时数据源，Skill 是对话执行层。插件等正式上架后再开放。</p>
           <div className="skill-actions">
-            <button onClick={() => setSkillInstallOpen(true)}>下载独立 Skill 包 ↓</button>
-            <span>本地 Skill 预览版 · 不需要连接 GPT API</span>
+            <button onClick={() => setSkillInstallOpen(true)}>在 Codex 中开始安装 →</button>
+            <span>只需安装一次 · 以后主题直接从官网打开</span>
           </div>
         </div>
         <div className="conversation-grid" aria-label="Theme Hub Skill 可以完成的对话">
@@ -426,7 +476,11 @@ export default function Home() {
                 <span><b>{selected.verifiedVersion}</b> 验证信息</span>
               </div>
               <div className="detail-actions">
-                <button className="primary-action" onClick={() => openInstall(selected)}>立即使用 →</button>
+                {getInstallGuide(selected).canUseInCodex ? (
+                  <a className="primary-action" href={themeUseChatUrl(selected)}>在 Codex 中使用 →</a>
+                ) : (
+                  <button className="primary-action" onClick={() => openInstall(selected)}>查看兼容状态 →</button>
+                )}
                 <a className="detail-link-button" href={selected.sourceUrl} target="_blank" rel="noreferrer">查看源仓库 ↗</a>
               </div>
             </div>
@@ -443,9 +497,11 @@ export default function Home() {
               <span className="section-index">{guide.eyebrow}</span>
               <h2 id="install-title">{guide.title}</h2>
               <p>{guide.description}</p>
-              <a className="skill-use-link" href={skillChatUrl(`使用官网主题 ${installTheme.name}（ID: ${installTheme.id}）。请从 Theme Hub 官方目录读取数据、检查兼容性并先创建恢复点。`)}>
-                在 Codex 中让 $theme-hub 完成 →
-              </a>
+              {guide.canUseInCodex && (
+                <a className="skill-use-link" href={themeUseChatUrl(installTheme)}>
+                  在 Codex 中验证并暂存 →
+                </a>
+              )}
               <ol className="install-steps">
                 {guide.steps.map((step, index) => <li key={step}><span>0{index + 1}</span><p>{step}</p></li>)}
               </ol>
@@ -473,23 +529,23 @@ export default function Home() {
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setSkillInstallOpen(false)}>
           <section className="skill-install-modal" role="dialog" aria-modal="true" aria-labelledby="skill-install-title" onMouseDown={(event) => event.stopPropagation()}>
             <button className="modal-close" onClick={() => setSkillInstallOpen(false)} aria-label="关闭 Skill 安装说明">×</button>
-            <span className="section-index">THEME HUB SKILL · LOCAL PREVIEW</span>
-            <h2 id="skill-install-title">添加 $theme-hub 到 Codex</h2>
-            <p>下载后解压出 <b>theme-hub</b> 文件夹，放进 Codex 的用户 Skill 目录。插件版本暂不开放，等正式上架后再切换为一键安装。</p>
+            <span className="section-index">GUIDED INSTALL · GITHUB VERIFIED</span>
+            <h2 id="skill-install-title">安装一次，以后主题直接用</h2>
+            <p>主流程会打开一个 Codex 安装任务：Codex 先检查官方 GitHub 来源、目标目录和现有版本，得到你的确认后才写入。浏览器不会静默安装任何内容。</p>
             <ol className="install-steps skill-install-steps">
-              <li><span>01</span><p>下载并解压 Skill 包</p></li>
-              <li><span>02</span><p>macOS / Linux 放到 ~/.agents/skills/</p></li>
-              <li><span>03</span><p>Windows 放到 %USERPROFILE%\.agents\skills\</p></li>
+              <li><span>01</span><p>打开预填好的 Codex 安装任务</p></li>
+              <li><span>02</span><p>检查来源、文件和目标目录后确认</p></li>
+              <li><span>03</span><p>开启新对话，直接使用官网主题</p></li>
             </ol>
             <div className="skill-paths">
               <code>~/.agents/skills/theme-hub/SKILL.md</code>
               <code>%USERPROFILE%\.agents\skills\theme-hub\SKILL.md</code>
             </div>
             <div className="skill-downloads">
-              <a className="install-primary" href={skillBundleUrl}>从 GitHub Release 下载 ↓</a>
-              <a className="install-secondary" href={githubRepoUrl} target="_blank" rel="noreferrer">查看 GitHub 源码 ↗</a>
+              <a className="install-primary" href={skillInstallerChatUrl()}>在 Codex 中开始安装 →</a>
+              <a className="install-secondary" href={skillBundleUrl}>手动下载 Skill ↓</a>
             </div>
-            <p className="install-source">放好后重启 Codex 或开始新对话，再输入：$theme-hub 帮我从官网挑一个主题。</p>
+            <p className="install-source">唯一发布源：<a href={githubRepoUrl} target="_blank" rel="noreferrer">GitHub 源码与 Releases ↗</a>。安装后开启新对话，再输入：$theme-hub 帮我从官网挑一个主题。</p>
           </section>
         </div>
       )}

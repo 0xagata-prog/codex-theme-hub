@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { themes } from "../../../db/schema";
 import { buildThemeManifest } from "../../../lib/theme-manifest";
+import { getThemeInstallability } from "../../../lib/theme-capability";
 import { ensureThemeData } from "../../../lib/theme-seed";
 
 function parseList(value: string): string[] {
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
       ...theme,
       tags: parseList(theme.tags),
       palette: parseList(theme.palette),
+      install: getThemeInstallability(theme),
     }));
     const sources = new Set(result.map((theme) => theme.sourceRepo));
     const creators = new Set(result.map((theme) => theme.author));
