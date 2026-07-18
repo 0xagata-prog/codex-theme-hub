@@ -1,74 +1,44 @@
 Goal:
-Build and publish SkinDex, the “Codex 口袋皮肤图鉴”, as a real theme gallery whose current distribution is a standalone `$theme-hub` Skill; defer public plugin distribution until the plugin is listed.
+Unify the public product, repository, standalone Skill, command, protocol, and release asset under SkinDex, while keeping the existing Sites hostname and legacy download redirects usable.
 
 Current state:
-The product brand is now SkinDex — The Codex Theme Index / Codex 口袋皮肤图鉴. The public GitHub repository and compatibility identifiers remain `0xagata-prog/codex-theme-hub`, `$theme-hub`, `theme_hub_request`, and `theme-hub/v1` so existing installs and deep links do not break. The latest published standalone Skill release is still v0.3.0 until the rebranded v0.4.0 source is explicitly published to GitHub. GitHub remains the only Skill source/version distribution layer. The public site remains on the legacy-compatible Sites hostname https://codex-theme-hub-cn.jyyang040703.chatgpt.site until the owner provides a custom SkinDex domain; it has a 14-theme D1 catalog, public anonymous browsing, and an owner-only review dashboard.
+The public GitHub repository is now `https://github.com/0xagata-prog/skindex`. The source is fully migrated to the canonical Skill name `skindex`, explicit invocation `$skindex`, deep-link field `skindex_request`, Manifest schema `skindex/v1`, and client marker `skindex-skill-v1`. The Skill source is the simple repository folder `skill/`; catalog and schema files are at `catalog/` and `schemas/`. The old plugin source bundle was removed because public plugin distribution remains deferred.
 
-The website now has an explicit first-use installation gate for every native or partial theme. Until the user self-confirms that SkinDex is installed on the current device, theme cards say “安装 SkinDex 后使用” and open a two-choice modal instead of a theme task. “还没安装” opens only the guided installer; “我已安装” records a device-local confirmation and opens the selected theme. Every Codex Skill deep link also carries a fail-fast guard: if `theme-hub` is absent, it must stop without reading the project, browsing the web, fetching a Manifest, or creating a restore point.
+The website installer is now a short Codex task invoking the built-in `$skill-installer` against `https://github.com/0xagata-prog/skindex/tree/main/skill`, explicitly naming the installation `skindex`. The UI no longer explains download locations or offers a manual ZIP as the primary path. Theme deep links require the installed `skindex` Skill and carry `skindex_request`.
 
-The live v0.2.0 source implements the first “two clicks” product framework. First install: the website opens a prefilled generic Codex task that verifies the official GitHub Release, target directory, and existing version, then waits for confirmation before writing the Skill. Manual GitHub download remains the fallback. Daily theme use: supported theme cards open a theme-specific `$theme-hub` task carrying only `themeId` and the official Manifest URL. The Skill validates, plans, creates a restore point, and stages; the user still confirms the final Codex Appearance import.
-
-The live v0.3.0 source adds a review-first submission policy. Repository submissions and generated-theme proposals explicitly enter `pending`, return `public: false` plus `publication: review-required`, and cannot appear in the public catalog until their theme status is `approved`. The repository form requires an explicit publication-review checkbox and returns a short review ID. After creating a local theme, the Skill proactively offers submission once; an interested answer is not upload consent, so it then discloses every field and thumbnail and waits for a second confirmation.
-
-The live source includes an owner-only `/review` dashboard. Public browsing remains anonymous, while Sign in with ChatGPT identifies the reviewer and a server-side `THEME_HUB_REVIEWER_EMAIL` allowlist restricts the page, action API, and pending-preview API to the single site-owner account. Generated proposals can be approved into the public `themes` catalog or rejected. GitHub repository submissions can be accepted into manual curation or rejected, but are never auto-published from incomplete metadata. Public generated preview delivery requires the proposal itself to be `approved`.
-
-Catalog API responses now expose a shared installability contract with `native`, `partial`, and `adapter-pending` support levels. Native and partial themes use `guided-import`; adapter-pending themes use `view-source` and never display a false install action. Manifest v1 optionally carries `install.experience` and `install.supportLevel`, while validation and adapter checks remain authoritative.
-
-The website no longer recommends Codex App Manager or directly links unsigned Styler installers as one-click actions. `.codexskin` and Styler entries now show adapter-pending compatibility notices and only link to traceable upstream sources. Native `codex-theme-v1` themes still require final confirmation inside Codex.
-
-Submission endpoints were hardened. GitHub submissions now require exact same-origin browser requests, JSON content type, and a 16 KB declared-body ceiling. Skill proposal submissions accept either exact same-origin browser requests or the standalone Skill client marker, enforce a 750 KB declared-body ceiling, retain the 700 KB file limit, and verify PNG/JPEG/WebP magic bytes before R2 upload. Pending previews remain private and explicit consent is still mandatory.
+Sites version 15 is published with the new SkinDex flow and display title. Legacy website routes remain as compatibility redirects or retirement responses. The public Sites hostname still contains `codex-theme-hub-cn` because that hosted slug cannot be renamed; there is no Vercel project in the connected account. A new URL requires binding an owner-controlled custom domain to Sites. The reviewer allowlist prefers `SKINDEX_REVIEWER_EMAIL` but temporarily falls back to the already-deployed `THEME_HUB_REVIEWER_EMAIL` secret so owner review is not broken.
 
 Files touched or relevant:
 README.md
-docs/theme-hub-framework.md
+docs/skindex-framework.md
 docs/skill-install.txt
-.github/workflows/release-skill.yml
+skill/SKILL.md
+skill/agents/openai.yaml
+skill/references/deep-link-v1.md
+skill/references/manifest-v1.md
+skill/scripts/skindex.mjs
+catalog/*.json
+schemas/theme-manifest-v1.schema.json
 app/page.tsx
-app/globals.css
 app/layout.tsx
-app/api/submissions/route.ts
-app/api/theme-proposals/route.ts
-app/api/review/[kind]/[id]/route.ts
-app/api/review/proposals/[id]/preview/route.ts
-app/api/theme-proposals/[id]/preview/route.ts
-app/review/page.tsx
-app/review/review-actions.tsx
-lib/reviewer-auth.ts
-app/downloads/codex-theme-hub-plugin.zip/route.ts
-lib/theme-capability.ts
-lib/review-policy.ts
-lib/image-security.ts
-plugins/codex-theme-hub/skills/theme-hub/SKILL.md
-plugins/codex-theme-hub/skills/theme-hub/references/deep-link-v1.md
-plugins/codex-theme-hub/skills/theme-hub/scripts/theme-hub.mjs
-tests/theme-hub-adapter.test.mjs
-tests/rendered-html.test.mjs
+app/downloads/skindex-skill.zip/route.ts
 app/downloads/theme-hub-skill.zip/route.ts
+app/downloads/codex-theme-hub-plugin.zip/route.ts
+lib/theme-manifest.ts
+lib/theme-capability.ts
+lib/reviewer-auth.ts
+.github/workflows/release-skill.yml
+tests/skindex-adapter.test.mjs
+tests/rendered-html.test.mjs
 
 Important decisions:
-SkinDex is a brand migration, not a protocol or package rename. Preserve the internal Skill name, install directory, GitHub repository, API request field, schema version, and existing hosted endpoint until a separately planned compatibility migration exists. A new branded hostname requires an owner-controlled custom domain because the existing Sites slug cannot be renamed.
-
-The website cannot inspect Codex's installed Skill list. Its installation state is deliberately a device-local user attestation, not a claim of technical detection. The fail-fast prompt is the second safety boundary if the user confirms installation incorrectly or later removes the Skill.
-
-“One click” means opening a safe, reviewable Codex task, not silent browser installation or appearance mutation. The initial installer prompt does not invoke `$theme-hub` because the Skill may not exist yet; it names the official GitHub source and targets `~/.agents/skills/theme-hub` or `%USERPROFILE%\.agents\skills\theme-hub`, discloses writes, protects existing installs, and waits for confirmation. Theme deep links invoke `$theme-hub` only after installation and carry a small structured request. Plugin packaging is the future official installable distribution layer and must not appear on the website until listing. No flow patches the Codex app bundle or silently changes appearance.
-
-All user submissions require review before publication. The first post-creation question asks only whether the user is interested in submitting; the second confirmation, after exact disclosure, authorizes upload.
-
-The user selected owner-only review. The public site must remain public; only `/review` and its data/actions are gated. Generated proposal approval publishes immediately after the owner reviews its private preview and metadata. Repository approval means accepted for curation, not public publication.
+Use the built-in `$skill-installer` for the main installation flow. Keep GitHub as the only source and version layer. Keep final Codex Appearance confirmation and restore points. Do not distribute a plugin until it is publicly listed. Preserve legacy website routes and the server-side reviewer environment fallback only as migration compatibility; do not show the old `$theme-hub` command in the main product flow.
 
 Verification:
-The installation-gate update passes `npm test` (build plus 4 product/security tests), `npm run test:theme-hub` (13 tests), `npm run lint`, and `git diff --check`. The policy tests assert the two installation choices, the device-local readiness key, removal of direct theme-card deep links, and the “missing Skill means stop without project or web fallback” prompt.
-
-The v0.3.0 source passes Skill Creator validation, `npm run test:theme-hub` (13 tests), `npm test` (build plus 3 product-policy tests), `npm run lint`, and `git diff --check`. GitHub Actions published v0.3.0 successfully; `theme-hub-skill.zip` passed `unzip -t` and has SHA-256 `9eacb6734454652933e6f69d504ad804b121168653fe441a254f5b42048d9558`. Production smoke tests returned HTTP 200, found the private-review and proactive-offer copy, confirmed all 14 catalog rows are approved, confirmed a missing-consent submission is rejected with HTTP 400 without creating data, and confirmed the legacy Skill URL redirects to the latest GitHub Release.
-
-The owner-review source passes `npm test` (build plus 4 product/security tests), `npm run test:theme-hub` (13 tests), `npm run lint`, and `git diff --check`. The build detects `/review`, the protected review action, private pending preview, and approved-only public preview routes. Sites environment revision 1 contains the single reviewer allowlist value as a secret. Production smoke tests confirmed the public home and catalog remain HTTP 200, `/review` redirects with HTTP 307 to Sign in with ChatGPT, the sign-in dispatcher redirects to OpenAI authorization, anonymous review actions and pending previews return HTTP 403, missing public previews return 404, and all 14 public catalog rows remain approved. No submissions were created or mutated during testing.
-
-Manual in-app browser QA on 2026-07-18 passed public catalog loading (14 themes), search, platform/mode filtering, native theme details and Codex deep-link payloads, adapter-pending compatibility messaging, Skill installation guidance, and repository-submission required/URL/consent validation. The allowlisted owner completed OpenAI sign-in and successfully opened `/review`; the owner session survived a page reload, both pending queues correctly showed empty state, and the browser console reported no errors. No test submission was transmitted and no review action was performed.
+Skill Creator validation passes. `npm run test:skindex` passes 13/13 tests. `npm test` passes the production build and 4/4 product/security tests. `npm run lint` and `git diff --check` pass. GitHub Actions published `v0.4.0`; the released `skindex-skill.zip` passes `unzip -t` with SHA-256 `8d989fe876a70cb2f5bc267393127bd52f103a2771da178b9ea9bdc527a332cd`. The official `$skill-installer` helper successfully installed the live GitHub `skill/` path into a temporary `skindex` destination and Skill Creator validated that installed copy. Production smoke tests found HTTP 200 for the homepage, `skindex/v1` for a live Manifest, a 307 from the new Skill download route to GitHub, and a 307 from `/review` to Sign in with ChatGPT. A legacy download redirect bug was found and fixed locally after version 15; republish this small fix.
 
 What to do next:
-Verify that a non-allowlisted OpenAI account is denied only when a safe secondary account is available; do not sign the owner out merely to create a test condition. Perform the first real review only when a genuine submission arrives. Then implement the social-source curation pipeline separately from GitHub-based installer/adapter discovery. Before broad promotion, add managed rate limiting and build the missing `.codexskin` and Styler adapters.
+Commit and push the legacy redirect fix plus this handoff, publish the resulting Sites version, and confirm the legacy route returns 307 instead of 500. To replace the visible `codex-theme-hub-cn.jyyang040703.chatgpt.site` hostname, ask the owner for the exact custom domain they control and attach it with Sites custom-domain management.
 
 Known risks:
-The public hostname and GitHub repository still contain the legacy `codex-theme-hub` slug. The Sites project slug cannot be renamed; changing the visible URL requires binding an owner-controlled custom domain. The currently published v0.3.0 Skill still carries the old display name until the rebranded v0.4.0 release is published.
-
-The guided installer is a prefilled Codex task, not an official install protocol; it still depends on Codex network/filesystem approvals and a new chat after installation. There is no documented direct Codex appearance-import deep link, so supported native imports still require user confirmation. The Skill client marker is a public identifier, not authentication, and there is still no robust server-side rate limit. Changing the owner account email requires updating the reviewer allowlist secret. Accepted repository submissions still need manual curation before publication. Third-party preview URLs create hotlink/privacy risk. Fan-created IP requires rights review. `.codexskin` and Styler adapters remain unavailable.
+The public Sites slug cannot be renamed and the connected Vercel account currently has no projects, so do not create a duplicate Vercel deployment: the app depends on Sites D1, R2, and Sign in with ChatGPT. A new public URL needs an owner-controlled custom domain. The current production reviewer secret still uses the legacy environment variable until a separate hosted-secret migration is completed.

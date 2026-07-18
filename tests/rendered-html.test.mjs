@@ -25,7 +25,7 @@ test("uses Codex Skill Installer with GitHub as the canonical source", async () 
   assert.doesNotMatch(page, /目标目录/);
   assert.doesNotMatch(page, /手动下载 Skill/);
   assert.match(skillRedirect, /Response\.redirect\(releaseUrl, 307\)/);
-  assert.match(legacyRedirect, /downloads\/skindex-skill\.zip/);
+  assert.match(legacyRedirect, /new URL\("\/downloads\/skindex-skill\.zip", request\.url\)/);
   assert.match(pluginRetirement, /status: 410/);
   assert.doesNotMatch(page, /codex plugin marketplace add/);
 });
