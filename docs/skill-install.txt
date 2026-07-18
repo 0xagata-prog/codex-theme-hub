@@ -1,6 +1,7 @@
 Codex Theme Hub Skill 本地预览版
 
-1. 下载并解压 theme-hub-skill.zip。
+1. 从 GitHub Release 下载并解压 theme-hub-skill.zip：
+   https://github.com/0xagata-prog/codex-theme-hub/releases/latest
 2. 把完整的 theme-hub 文件夹放到用户 Skill 目录：
    macOS / Linux: ~/.agents/skills/theme-hub/
    Windows: %USERPROFILE%\.agents\skills\theme-hub\
@@ -9,4 +10,4 @@ Codex Theme Hub Skill 本地预览版
 5. 输入：$theme-hub 帮我从官网挑一个低眩光主题。
 
 Skill 不需要单独连接 GPT API。官网深链只预填对话，不会自动发送、安装或修改外观。
-插件版暂不开放，等正式上架后再提供。
+GitHub 是源码和版本的唯一发布源；插件版暂不开放，等正式上架后再提供。

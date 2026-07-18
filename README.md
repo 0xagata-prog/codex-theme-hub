@@ -4,12 +4,16 @@ Codex 主题与皮肤聚合目录，以及当前可独立安装的 `$theme-hub` 
 
 公开站点：<https://codex-theme-hub-cn.jyyang040703.chatgpt.site/>
 
+GitHub 源码：<https://github.com/0xagata-prog/codex-theme-hub>
+
+最新 Skill：<https://github.com/0xagata-prog/codex-theme-hub/releases/latest/download/theme-hub-skill.zip>
+
 ## 当前能力
 
 - D1 真实主题目录、GitHub 投稿队列与 Skill 生成主题审核队列。
 - R2 保存用户明确同意上传的生成主题预览；未确认内容只留在本地。
 - 统一的 `Theme Manifest v1` 数据契约。
-- 官网可下载独立 `theme-hub` Skill；插件源码保留，等公开上架后再作为分发方式开放。
+- GitHub 是 Skill 源码和版本的唯一发布源；官网安装按钮指向最新 GitHub Release。
 - `codex-theme-v1` 的校验、托管暂存、恢复点与剪贴板适配器。
 - 官网目录查询、逐主题 Manifest API、参考图生成流程与经确认提交审核。
 - 官网到 Codex 的 `$theme-hub` 对话深链；链接只预填对话，不会绕过用户确认。
@@ -18,7 +22,7 @@ Codex 主题与皮肤聚合目录，以及当前可独立安装的 `$theme-hub` 
 
 ## Skill 安装
 
-从官网下载 `theme-hub-skill.zip`，解压后把完整的 `theme-hub` 文件夹放进用户 Skill 目录：
+从 [GitHub Releases](https://github.com/0xagata-prog/codex-theme-hub/releases) 下载 `theme-hub-skill.zip`，解压后把完整的 `theme-hub` 文件夹放进用户 Skill 目录：
 
 ```text
 macOS / Linux: ~/.agents/skills/theme-hub/SKILL.md

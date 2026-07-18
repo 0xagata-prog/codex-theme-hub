@@ -2,7 +2,7 @@ Goal:
 Build and publish Codex Theme Hub as a real theme gallery whose current distribution is a standalone `$theme-hub` Skill; defer public plugin distribution until the plugin is listed.
 
 Current state:
-The public site is https://codex-theme-hub-cn.jyyang040703.chatgpt.site, deployed as Sites version 8, with a 14-theme D1 catalog and public anonymous browsing. The standalone Skill is now the only Theme Hub download. The old plugin archive and Marketplace installation UI were removed, and the former download URL returns `410 Gone`; plugin source remains in the repository for later listing work. The Skill can query the live catalog, fetch official manifests, create a local data-only theme from generated colors, stage and restore native themes, and submit a generated preview only after explicit consent.
+The public GitHub repository is https://github.com/0xagata-prog/codex-theme-hub and the first standalone Skill release is v0.1.0. GitHub is the only Skill source/version distribution layer. The public site is https://codex-theme-hub-cn.jyyang040703.chatgpt.site, currently deployed as Sites version 8, with a 14-theme D1 catalog and public anonymous browsing. The website source now points its Skill download to the latest GitHub Release and preserves the former website ZIP URL as a redirect. The old plugin archive and Marketplace installation UI remain removed, and the former plugin download URL returns `410 Gone`; plugin source remains in the repository for later listing work.
 
 The website no longer recommends Codex App Manager or directly links unsigned Styler installers as one-click actions. `.codexskin` and Styler entries now show adapter-pending compatibility notices and only link to traceable upstream sources. Native `codex-theme-v1` themes still require final confirmation inside Codex.
 
@@ -23,13 +23,13 @@ plugins/codex-theme-hub/skills/theme-hub/SKILL.md
 plugins/codex-theme-hub/skills/theme-hub/references/deep-link-v1.md
 plugins/codex-theme-hub/skills/theme-hub/scripts/theme-hub.mjs
 tests/theme-hub-adapter.test.mjs
-public/downloads/theme-hub-skill.zip
+app/downloads/theme-hub-skill.zip/route.ts
 
 Important decisions:
-Users currently install the loose `theme-hub` Skill folder under `~/.agents/skills/` or `%USERPROFILE%\.agents\skills\`. A `codex://new` link only pre-fills `$theme-hub`; it never installs or sends automatically. Plugin packaging is a future distribution layer and must not appear on the website until public listing. Theme generation is local by default. Uploading a preview is a separate action that requires explicit disclosure and consent and creates only a private pending proposal. No flow patches the Codex app bundle or silently changes appearance.
+Users download the versioned Skill from GitHub Releases and install the loose `theme-hub` folder under `~/.agents/skills/` or `%USERPROFILE%\.agents\skills\`. A `codex://new` link only pre-fills `$theme-hub`; it never installs or sends automatically. Plugin packaging is a future distribution layer and must not appear on the website until public listing. Theme generation is local by default. Uploading a preview is a separate action that requires explicit disclosure and consent and creates only a private pending proposal. No flow patches the Codex app bundle or silently changes appearance.
 
 Verification:
-Skill Creator validation passes. `npm run test:theme-hub` passes 12 tests, including image signature validation and the Skill client marker. `npm run lint`, `npm run build`, `git diff --check`, and `unzip -t public/downloads/theme-hub-skill.zip` pass. The archive has `theme-hub/` as its root and contains `SKILL.md`, `agents`, `scripts`, and `references`. Production smoke tests confirm the new archive returns 200, the retired plugin URL returns 410, the catalog returns 14 themes, origin-less GitHub submission returns 403, unmarked proposal submission returns 403, and a fake PNG returns 400 before storage.
+Skill Creator validation passes. `npm run test:theme-hub` passes 12 tests, including image signature validation and the Skill client marker. `npm run lint`, `npm run build`, and `git diff --check` pass. GitHub Release v0.1.0 is public and its `theme-hub-skill.zip` asset has SHA-256 `cc9261e4891fb8ec818572a8aa706beb2c1b9501e60715fe8de72a212fe6e7bd`; a fresh download passes `unzip -t` and contains `theme-hub/SKILL.md`, `agents`, `scripts`, and `references`. Previous production smoke tests confirmed the retired plugin URL returns 410, the catalog returns 14 themes, origin-less GitHub submission returns 403, unmarked proposal submission returns 403, and a fake PNG returns 400 before storage. The website-to-GitHub redirect still needs a post-deployment smoke test.
 
 What to do next:
 Test the downloaded Skill in a fresh Codex task. Before broad promotion, add managed rate limiting and reviewer tooling. Later prepare privacy, terms, support, listing assets, five positive tests, and three negative tests for a skills-only public plugin submission.

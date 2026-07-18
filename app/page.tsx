@@ -49,7 +49,8 @@ type InstallGuide = {
 
 const filters = ["全部", "桌面端", "CLI", "深色", "浅色", "双模式"] as const;
 
-const skillBundleUrl = "/downloads/theme-hub-skill.zip";
+const githubRepoUrl = "https://github.com/0xagata-prog/codex-theme-hub";
+const skillBundleUrl = `${githubRepoUrl}/releases/latest/download/theme-hub-skill.zip`;
 
 function skillChatUrl(prompt: string) {
   return `codex://new?prompt=${encodeURIComponent(`$theme-hub ${prompt}`)}`;
@@ -485,8 +486,8 @@ export default function Home() {
               <code>%USERPROFILE%\.agents\skills\theme-hub\SKILL.md</code>
             </div>
             <div className="skill-downloads">
-              <a className="install-primary" href={skillBundleUrl} download>下载 Theme Hub Skill ↓</a>
-              <a className="install-secondary" href="codex://skills">打开 Codex Skills ↗</a>
+              <a className="install-primary" href={skillBundleUrl}>从 GitHub Release 下载 ↓</a>
+              <a className="install-secondary" href={githubRepoUrl} target="_blank" rel="noreferrer">查看 GitHub 源码 ↗</a>
             </div>
             <p className="install-source">放好后重启 Codex 或开始新对话，再输入：$theme-hub 帮我从官网挑一个主题。</p>
           </section>
