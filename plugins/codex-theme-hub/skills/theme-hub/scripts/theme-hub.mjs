@@ -518,7 +518,7 @@ export async function submitThemeProposal({
     throw new Error("palette must contain 3–6 comma-separated hex colors");
   }
   const bytes = await readFile(path.resolve(previewPath));
-  if (!bytes.length || bytes.length > 4 * 1024 * 1024) throw new Error("preview must be between 1 byte and 4 MB");
+  if (!bytes.length || bytes.length > 700 * 1024) throw new Error("review thumbnail must be between 1 byte and 700 KB");
   const mime = previewMime(previewPath);
   const form = new FormData();
   form.set("metadata", JSON.stringify({

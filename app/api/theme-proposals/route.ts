@@ -6,7 +6,7 @@ import { getThemeAssets } from "../../../storage";
 const allowedPlatforms = new Set(["桌面端", "CLI", "全平台"]);
 const allowedMimeTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
 const hexColor = /^#[0-9a-f]{6}$/i;
-const maxPreviewBytes = 4 * 1024 * 1024;
+const maxPreviewBytes = 700 * 1024;
 
 type ProposalMetadata = {
   themeName?: string;
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "主题色板需包含 3–6 个十六进制颜色" }, { status: 400 });
     }
     if (!allowedMimeTypes.has(preview.type) || preview.size <= 0 || preview.size > maxPreviewBytes) {
-      return Response.json({ error: "预览图需为 PNG、JPEG 或 WebP，且不超过 4 MB" }, { status: 400 });
+      return Response.json({ error: "审核缩略图需为 PNG、JPEG 或 WebP，且不超过 700 KB" }, { status: 400 });
     }
 
     await ensureThemeData();

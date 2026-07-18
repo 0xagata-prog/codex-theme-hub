@@ -43,7 +43,7 @@ An explicit “install and apply” prompt authorizes validation and staging of 
 ## Create from an image
 
 1. Inspect the attached image and ask only for genuinely missing intent. Otherwise begin directly.
-2. Use an available image-generation or image-editing capability to create an original theme preview. Preserve named third-party characters only when requested; label fan work clearly and never imply official affiliation.
+2. Use an available image-generation or image-editing capability to create an original theme preview. Preserve named third-party characters only when requested; label fan work clearly and never imply official affiliation. Keep the full-resolution preview locally and export a PNG, JPEG, or WebP review thumbnail no larger than 700 KB if the user later chooses to submit it.
 3. Derive a readable surface, ink, and accent color. Check contrast and keep code text legible.
 4. Create a local data-only manifest:
 
@@ -57,7 +57,7 @@ Be explicit when the generated preview contains layout, character, animation, or
 
 ## Submit a generated theme to Theme Hub
 
-Before uploading anything, show the user exactly what will be sent: theme name, author label, palette, notes, and preview image. Ask: “要把这些内容上传到 Theme Hub 审核队列吗？”
+Before uploading anything, show the user exactly what will be sent: theme name, author label, palette, notes, and the review thumbnail (maximum 700 KB). Ask: “要把这些内容上传到 Theme Hub 审核队列吗？”
 
 Only after an unambiguous yes, run:
 
