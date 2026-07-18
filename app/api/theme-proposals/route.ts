@@ -1,6 +1,7 @@
 import { getDb } from "../../../db";
 import { themeProposals } from "../../../db/schema";
 import { ensureThemeData } from "../../../lib/theme-seed";
+import { matchesImageSignature } from "../../../lib/image-security";
 import { getThemeAssets } from "../../../storage";
 
 const allowedPlatforms = new Set(["桌面端", "CLI", "全平台"]);
@@ -27,10 +28,16 @@ function safeExtension(type: string) {
 export async function POST(request: Request) {
   let uploadedKey = "";
   try {
+    const requestOrigin = new URL(request.url).origin;
     const origin = request.headers.get("origin");
-    if (origin && origin !== new URL(request.url).origin) {
-      return Response.json({ error: "跨站投稿请求已拒绝" }, { status: 403 });
+    const skillClient = request.headers.get("x-theme-hub-client");
+    const sameOriginBrowser = origin === requestOrigin;
+    const trustedSkillClient = !origin && skillClient === "theme-hub-skill-v1";
+    if (!sameOriginBrowser && !trustedSkillClient) {
+      return Response.json({ error: "投稿客户端无法验证" }, { status: 403 });
     }
+    const declaredLength = Number(request.headers.get("content-length") ?? 0);
+    if (declaredLength > 750 * 1024) return Response.json({ error: "投稿内容过大" }, { status: 413 });
 
     const data = await request.formData();
     const metadataValue = data.get("metadata");
@@ -69,11 +76,16 @@ export async function POST(request: Request) {
       return Response.json({ error: "审核缩略图需为 PNG、JPEG 或 WebP，且不超过 700 KB" }, { status: 400 });
     }
 
+    const previewBytes = await preview.arrayBuffer();
+    if (!matchesImageSignature(preview.type, previewBytes)) {
+      return Response.json({ error: "预览图内容与文件类型不匹配" }, { status: 400 });
+    }
+
     await ensureThemeData();
     const id = crypto.randomUUID();
     uploadedKey = `theme-proposals/${id}/preview.${safeExtension(preview.type)}`;
     const consentAt = new Date().toISOString();
-    await getThemeAssets().put(uploadedKey, await preview.arrayBuffer(), {
+    await getThemeAssets().put(uploadedKey, previewBytes, {
       httpMetadata: { contentType: preview.type },
     });
     await getDb().insert(themeProposals).values({

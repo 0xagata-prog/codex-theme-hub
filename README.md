@@ -1,6 +1,6 @@
 # Codex Theme Hub
 
-Codex 主题与皮肤聚合目录，以及可安装的 Theme Hub 插件和 `$theme-hub` 对话 Skill。
+Codex 主题与皮肤聚合目录，以及当前可独立安装的 `$theme-hub` 对话 Skill。
 
 公开站点：<https://codex-theme-hub-cn.jyyang040703.chatgpt.site/>
 
@@ -9,27 +9,30 @@ Codex 主题与皮肤聚合目录，以及可安装的 Theme Hub 插件和 `$the
 - D1 真实主题目录、GitHub 投稿队列与 Skill 生成主题审核队列。
 - R2 保存用户明确同意上传的生成主题预览；未确认内容只留在本地。
 - 统一的 `Theme Manifest v1` 数据契约。
-- 仓库级 `codex-theme-hub` Marketplace、可下载开发预览包与插件。
+- 官网可下载独立 `theme-hub` Skill；插件源码保留，等公开上架后再作为分发方式开放。
 - `codex-theme-v1` 的校验、托管暂存、恢复点与剪贴板适配器。
 - 官网目录查询、逐主题 Manifest API、参考图生成流程与经确认提交审核。
-- 官网到 Codex 的 `$theme-hub` 对话深链；正式一键安装需等待公开插件审核。
+- 官网到 Codex 的 `$theme-hub` 对话深链；链接只预填对话，不会绕过用户确认。
 
-产品框架见 [docs/theme-hub-framework.md](docs/theme-hub-framework.md)。插件实现见 [plugins/codex-theme-hub](plugins/codex-theme-hub)。
+产品框架见 [docs/theme-hub-framework.md](docs/theme-hub-framework.md)。Skill 源码位于 [plugins/codex-theme-hub/skills/theme-hub](plugins/codex-theme-hub/skills/theme-hub)。
 
-## 插件开发预览安装
+## Skill 安装
 
-解压官网下载的插件包，在包根目录运行：
+从官网下载 `theme-hub-skill.zip`，解压后把完整的 `theme-hub` 文件夹放进用户 Skill 目录：
 
-```bash
-codex plugin marketplace add .
+```text
+macOS / Linux: ~/.agents/skills/theme-hub/SKILL.md
+Windows: %USERPROFILE%\.agents\skills\theme-hub\SKILL.md
 ```
 
-重启 Codex 后打开 `/plugins`，安装 Codex Theme Hub。安装完成后可以直接说：
+重启 Codex 或开始新对话后，可以直接说：
 
 ```text
 $theme-hub 帮我从官网挑一个低眩光主题。
 $theme-hub 参考我发的图片生成一个原创主题。
 ```
+
+当前 Skill 不需要单独连接 GPT API。`.codexskin` 与 Codex Styler 适配器尚未开放；它们只展示可追溯来源，不作为一键安装入口。
 
 ## 网站开发
 

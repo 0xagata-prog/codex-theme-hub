@@ -49,19 +49,11 @@ type InstallGuide = {
 
 const filters = ["全部", "桌面端", "CLI", "深色", "浅色", "双模式"] as const;
 
-const pluginBundleUrl = "/downloads/codex-theme-hub-plugin.zip";
-const pluginInstallCommand = "codex plugin marketplace add .";
+const skillBundleUrl = "/downloads/theme-hub-skill.zip";
 
 function skillChatUrl(prompt: string) {
   return `codex://new?prompt=${encodeURIComponent(`$theme-hub ${prompt}`)}`;
 }
-
-const skinDownloads: Record<string, string> = {
-  "fortune-pavilion": "caishen-jubao-1.0.1.codexskin",
-  "celestial-court": "celestial-court-1.0.1.codexskin",
-  "ming-imperial": "ming-imperial-1.0.1.codexskin",
-  "underworld-tribunal": "underworld-yama-1.0.1.codexskin",
-};
 
 function getInstallGuide(theme: Theme): InstallGuide {
   if (theme.verifiedVersion.includes("codex-theme-v1")) {
@@ -81,32 +73,31 @@ function getInstallGuide(theme: Theme): InstallGuide {
   }
 
   if (theme.sourceRepo === "Wangnov/awesome-codex-skins") {
-    const filename = skinDownloads[theme.id];
     return {
       kind: "skin",
-      buttonLabel: "下载皮肤",
-      eyebrow: ".CODEXSKIN PACKAGE",
-      title: `安装 ${theme.name}`,
-      description: "这是经过仓库质量门验证的 .codexskin 包。下载后由 Codex App Manager 完成试穿、应用和还原。",
-      steps: ["下载下方 .codexskin 文件", "打开 Codex App Manager 的主题页面", "把文件拖入页面，选择“试穿”或“应用”"],
-      primaryUrl: `https://github.com/Wangnov/awesome-codex-skins/releases/download/skins-v1.1.0/${filename}`,
-      primaryLabel: "下载 .codexskin ↓",
-      secondaryUrl: "https://github.com/Wangnov/Codex-App-Manager",
-      secondaryLabel: "获取 Codex App Manager ↗",
+      buttonLabel: "查看兼容状态",
+      eyebrow: ".CODEXSKIN · ADAPTER PENDING",
+      title: `${theme.name} 暂未开放一键导入`,
+      description: "Theme Hub 已识别这个 .codexskin 来源，但当前 Skill 还没有经过验证、可回滚的运行时适配器，因此不会替你执行第三方安装器或修改 Codex。",
+      steps: ["先查看原仓库的格式与许可说明", "等待 Theme Hub 发布可信适配器", "适配器可用前继续保留当前 Codex 主题"],
+      primaryUrl: theme.sourceUrl,
+      primaryLabel: "查看格式仓库 ↗",
+      secondaryUrl: theme.downloadUrl,
+      secondaryLabel: "查看原始 Release ↗",
     };
   }
 
   return {
     kind: "styler",
-    buttonLabel: "安装后使用",
-    eyebrow: "CODEX STYLER BETA",
-    title: `使用 ${theme.name}`,
-    description: "这类场景主题由 Codex Styler 管理。选择系统安装包，安装后即可在 Styler 中切换主题并随时还原。",
-    steps: ["下载与你电脑匹配的安装包", "安装并首次打开 Codex Styler", "在主题场景中选择并应用此主题"],
-    primaryUrl: "https://github.com/xuhuanstudio/codex-styler/releases/download/v0.2.0-beta.2/Codex-Styler_0.2.0-beta.2_aarch64-unsigned.dmg",
-    primaryLabel: "下载 macOS Apple 芯片版 ↓",
-    secondaryUrl: "https://github.com/xuhuanstudio/codex-styler/releases/download/v0.2.0-beta.2/Codex-Styler_0.2.0-beta.2_x64-unsigned-setup.exe",
-    secondaryLabel: "下载 Windows x64 版 ↓",
+    buttonLabel: "查看兼容状态",
+    eyebrow: "CODEX STYLER · ADAPTER PENDING",
+    title: `${theme.name} 暂未开放一键导入`,
+    description: "这类场景主题依赖第三方 Codex Styler。当前 Theme Hub Skill 只展示可追溯来源，不直接分发或执行未签名安装器。",
+    steps: ["先查看原项目的能力、许可和风险说明", "等待 Theme Hub 发布可信适配器", "适配器可用前不要把“查看来源”当作一键安装"],
+    primaryUrl: theme.sourceUrl,
+    primaryLabel: "查看源仓库 ↗",
+    secondaryUrl: theme.downloadUrl,
+    secondaryLabel: "查看原始 Release ↗",
   };
 }
 
@@ -190,8 +181,7 @@ export default function Home() {
   const [selected, setSelected] = useState<Theme | null>(null);
   const [installTheme, setInstallTheme] = useState<Theme | null>(null);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-  const [pluginOpen, setPluginOpen] = useState(false);
-  const [pluginCopyState, setPluginCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const [skillInstallOpen, setSkillInstallOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [submitMessage, setSubmitMessage] = useState("");
@@ -268,15 +258,6 @@ export default function Home() {
     }
   };
 
-  const copyPluginCommand = async () => {
-    try {
-      await navigator.clipboard.writeText(pluginInstallCommand);
-      setPluginCopyState("copied");
-    } catch {
-      setPluginCopyState("error");
-    }
-  };
-
   const submitTheme = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -314,7 +295,7 @@ export default function Home() {
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Codex Theme Hub 首页"><span>C</span><strong>Codex Theme Hub</strong></a>
         <nav aria-label="主导航"><a href="#skill">主题 Skill</a><a href="#themes">真实主题</a><a href="#sources">数据来源</a><button onClick={() => setSubmitOpen(true)}>投稿</button></nav>
-        <button className="submit-nav" onClick={() => { setPluginOpen(true); setPluginCopyState("idle"); }}>安装 Skill <span>↗</span></button>
+        <button className="submit-nav" onClick={() => setSkillInstallOpen(true)}>下载 Skill <span>↗</span></button>
       </header>
 
       <section className="hero real-hero" id="top">
@@ -323,7 +304,7 @@ export default function Home() {
           <h1>真实主题，<br /><em>真实来源。</em></h1>
           <p>官网负责发现和创作，Theme Hub Skill 负责在 Codex 里对话切换。你也可以发一张图片，让它生成主题并在确认后提交回官网审核。</p>
           <div className="hero-actions">
-            <button onClick={() => { setPluginOpen(true); setPluginCopyState("idle"); }}>安装 Theme Hub Skill <span>→</span></button>
+            <button onClick={() => setSkillInstallOpen(true)}>下载 Theme Hub Skill <span>→</span></button>
             <a href={skillChatUrl("帮我从官网挑一个适合长时间编码的主题。")}>打开 Codex 对话 ↗</a>
           </div>
           <form className="hero-search" onSubmit={(event) => event.preventDefault()}>
@@ -355,12 +336,12 @@ export default function Home() {
 
       <section className="skill-section" id="skill">
         <div className="skill-intro">
-          <span className="section-index">01 / CODEX PLUGIN</span>
+          <span className="section-index">01 / CODEX SKILL</span>
           <h2>装一次，之后直接和主题助手说话。</h2>
-          <p>用户安装的是 Codex Theme Hub 插件，插件里包含 <b>$theme-hub</b> Skill。官网是实时数据源，Skill 是执行层。</p>
+          <p>当前直接安装 <b>$theme-hub</b> Skill：官网是实时数据源，Skill 是对话执行层。插件等正式上架后再开放。</p>
           <div className="skill-actions">
-            <button onClick={() => { setPluginOpen(true); setPluginCopyState("idle"); }}>下载开发预览包 ↓</button>
-            <span>公开插件目录审核前 · 不需要连接 GPT API</span>
+            <button onClick={() => setSkillInstallOpen(true)}>下载独立 Skill 包 ↓</button>
+            <span>本地 Skill 预览版 · 不需要连接 GPT API</span>
           </div>
         </div>
         <div className="conversation-grid" aria-label="Theme Hub Skill 可以完成的对话">
@@ -481,31 +462,33 @@ export default function Home() {
                   <a className="install-secondary" href={guide.secondaryUrl} target="_blank" rel="noreferrer">{guide.secondaryLabel}</a>
                 </div>
               )}
-              <p className="install-source">{guide.kind === "copy" ? "Skill 流程和手动导入都需要你在 Codex 内确认；网站不会静默修改外观。" : "文件和安装器均直接来自原作者 GitHub Release，本站不重新打包。"}</p>
+              <p className="install-source">{guide.kind === "copy" ? "Skill 流程和手动导入都需要你在 Codex 内确认；网站不会静默修改外观。" : "本站只展示可追溯的原始来源，不重新打包、不执行第三方文件，也不声称当前已经支持一键导入。"}</p>
             </section>
           </div>
         );
       })()}
 
-      {pluginOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setPluginOpen(false)}>
-          <section className="plugin-modal" role="dialog" aria-modal="true" aria-labelledby="plugin-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="modal-close" onClick={() => setPluginOpen(false)} aria-label="关闭插件安装说明">×</button>
-            <span className="section-index">CODEX THEME HUB PLUGIN · PREVIEW</span>
-            <h2 id="plugin-title">安装插件，获得 $theme-hub Skill</h2>
-            <p>这是公开目录审核前的开发预览包。解压后把该目录加入 Codex Marketplace，再从 <b>/plugins</b> 安装 Codex Theme Hub。</p>
-            <ol className="install-steps plugin-steps">
-              <li><span>01</span><p>下载并解压插件包</p></li>
-              <li><span>02</span><p>在解压目录运行下方命令</p></li>
-              <li><span>03</span><p>重启 Codex，在 /plugins 中安装</p></li>
+      {skillInstallOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setSkillInstallOpen(false)}>
+          <section className="skill-install-modal" role="dialog" aria-modal="true" aria-labelledby="skill-install-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSkillInstallOpen(false)} aria-label="关闭 Skill 安装说明">×</button>
+            <span className="section-index">THEME HUB SKILL · LOCAL PREVIEW</span>
+            <h2 id="skill-install-title">添加 $theme-hub 到 Codex</h2>
+            <p>下载后解压出 <b>theme-hub</b> 文件夹，放进 Codex 的用户 Skill 目录。插件版本暂不开放，等正式上架后再切换为一键安装。</p>
+            <ol className="install-steps skill-install-steps">
+              <li><span>01</span><p>下载并解压 Skill 包</p></li>
+              <li><span>02</span><p>macOS / Linux 放到 ~/.agents/skills/</p></li>
+              <li><span>03</span><p>Windows 放到 %USERPROFILE%\.agents\skills\</p></li>
             </ol>
-            <div className="plugin-command"><code>{pluginInstallCommand}</code><button onClick={copyPluginCommand}>{pluginCopyState === "copied" ? "已复制 ✓" : "复制命令"}</button></div>
-            {pluginCopyState === "error" && <p className="install-error">浏览器未允许复制，请手动复制上方命令。</p>}
-            <div className="plugin-downloads">
-              <a className="install-primary" href={pluginBundleUrl} download>下载插件预览包 ↓</a>
-              <a className="install-secondary" href={skillChatUrl("介绍 Theme Hub Skill 能做什么，并告诉我如何开始。")}>安装后开始对话 ↗</a>
+            <div className="skill-paths">
+              <code>~/.agents/skills/theme-hub/SKILL.md</code>
+              <code>%USERPROFILE%\.agents\skills\theme-hub\SKILL.md</code>
             </div>
-            <p className="install-source">公开插件目录的一键安装需要通过 OpenAI 插件审核；当前包适合测试产品流程。</p>
+            <div className="skill-downloads">
+              <a className="install-primary" href={skillBundleUrl} download>下载 Theme Hub Skill ↓</a>
+              <a className="install-secondary" href="codex://skills">打开 Codex Skills ↗</a>
+            </div>
+            <p className="install-source">放好后重启 Codex 或开始新对话，再输入：$theme-hub 帮我从官网挑一个主题。</p>
           </section>
         </div>
       )}

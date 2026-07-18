@@ -531,7 +531,11 @@ export async function submitThemeProposal({
     consent: true,
   }));
   form.set("preview", new Blob([bytes], { type: mime }), path.basename(previewPath));
-  const data = await responseJson(await fetchImpl(endpointUrl(endpoint, "/api/theme-proposals"), { method: "POST", body: form }));
+  const data = await responseJson(await fetchImpl(endpointUrl(endpoint, "/api/theme-proposals"), {
+    method: "POST",
+    headers: { "X-Theme-Hub-Client": "theme-hub-skill-v1" },
+    body: form,
+  }));
   return { status: "submitted-for-review", ...data.proposal };
 }
 

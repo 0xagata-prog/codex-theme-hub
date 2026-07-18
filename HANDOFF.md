@@ -1,46 +1,37 @@
 Goal:
-Build and publish Codex Theme Hub: a real theme gallery whose long-term primary action is “use in Codex” through one conversational, reversible workflow.
+Build and publish Codex Theme Hub as a real theme gallery whose current distribution is a standalone `$theme-hub` Skill; defer public plugin distribution until the plugin is listed.
 
 Current state:
-The public site is https://codex-theme-hub-cn.jyyang040703.chatgpt.site with a 14-theme D1 catalog and public access without a ChatGPT gate. The current source adds a first-class plugin/Skill section, a downloadable development preview bundle, `$theme-hub` conversation deep links, a live per-theme Manifest response through `/api/themes?format=manifest&id=...`, and `/api/theme-proposals` for consent-gated generated-theme submissions. D1 stores proposal metadata and the new `THEME_ASSETS` R2 binding stores preview bytes. Pending previews are not exposed publicly. Sites rejects large multipart bodies before the route, so proposal review thumbnails are capped at 700 KB while full-resolution art stays local.
+The public site is https://codex-theme-hub-cn.jyyang040703.chatgpt.site with a 14-theme D1 catalog and public anonymous browsing. The source now makes the standalone Skill the only Theme Hub download. The old plugin archive and Marketplace installation UI were removed; plugin source remains in the repository for later listing work. The Skill can query the live catalog, fetch official manifests, create a local data-only theme from generated colors, stage and restore native themes, and submit a generated preview only after explicit consent.
 
-The plugin is now v0.2.0. Its `$theme-hub` Skill can query the live catalog, fetch official manifests, create a local data-only theme from generated colors, stage and restore native themes, and submit a generated preview only after explicit `--consent yes`. The website is the data/discovery layer; the plugin is the installable distribution bundle; the Skill is the conversational execution layer. Current official Codex behavior still requires the user to confirm the final Appearance import.
+The website no longer recommends Codex App Manager or directly links unsigned Styler installers as one-click actions. `.codexskin` and Styler entries now show adapter-pending compatibility notices and only link to traceable upstream sources. Native `codex-theme-v1` themes still require final confirmation inside Codex.
+
+Submission endpoints were hardened. GitHub submissions now require exact same-origin browser requests, JSON content type, and a 16 KB declared-body ceiling. Skill proposal submissions accept either exact same-origin browser requests or the standalone Skill client marker, enforce a 750 KB declared-body ceiling, retain the 700 KB file limit, and verify PNG/JPEG/WebP magic bytes before R2 upload. Pending previews remain private and explicit consent is still mandatory.
 
 Files touched or relevant:
 README.md
 docs/theme-hub-framework.md
-.agents/plugins/marketplace.json
-plugins/codex-theme-hub/.codex-plugin/plugin.json
-plugins/codex-theme-hub/schemas/theme-manifest-v1.schema.json
-plugins/codex-theme-hub/catalog/chalkboard-green.json
-plugins/codex-theme-hub/catalog/blue-messenger-2007.json
+docs/skill-install.txt
+app/page.tsx
+app/globals.css
+app/layout.tsx
+app/api/submissions/route.ts
+app/api/theme-proposals/route.ts
+lib/image-security.ts
 plugins/codex-theme-hub/skills/theme-hub/SKILL.md
-plugins/codex-theme-hub/skills/theme-hub/agents/openai.yaml
-plugins/codex-theme-hub/skills/theme-hub/references/manifest-v1.md
 plugins/codex-theme-hub/skills/theme-hub/references/deep-link-v1.md
 plugins/codex-theme-hub/skills/theme-hub/scripts/theme-hub.mjs
 tests/theme-hub-adapter.test.mjs
-package.json
-app/page.tsx
-app/globals.css
-app/api/theme-proposals/route.ts
-app/api/themes/route.ts
-db/schema.ts
-drizzle/0001_lyrical_blockbuster.sql
-lib/theme-manifest.ts
-lib/theme-seed.ts
-public/themes/blue-messenger-2007.png
-public/downloads/codex-theme-hub-plugin.zip
-storage.ts
+public/downloads/theme-hub-skill.zip
 
 Important decisions:
-Users install the plugin, not a loose skill folder. The plugin bundles `$theme-hub`; the site can ship a development preview archive now, while a true public one-click install requires Plugins Directory review. Theme generation is local by default. Uploading a preview is a separate open-world action that requires an explicit disclosure and yes; it creates a private pending proposal, never an immediate public theme. App Manager remains out of the user-facing product.
+Users currently install the loose `theme-hub` Skill folder under `~/.agents/skills/` or `%USERPROFILE%\.agents\skills\`. A `codex://new` link only pre-fills `$theme-hub`; it never installs or sends automatically. Plugin packaging is a future distribution layer and must not appear on the website until public listing. Theme generation is local by default. Uploading a preview is a separate action that requires explicit disclosure and consent and creates only a private pending proposal. No flow patches the Codex app bundle or silently changes appearance.
 
 Verification:
-Skill Creator validation passes. `npm run test:theme-hub` passes 10 tests covering the previous adapter safety cases plus generated-manifest creation, catalog query behavior, and refusal to upload without explicit consent. `npm run lint` and `npm run build` pass with `/api/theme-proposals` included. The R2-backed production submission path still needs a post-deployment smoke test.
+Skill Creator validation passes. `npm run test:theme-hub` passes 12 tests, including image signature validation and the Skill client marker. `npm run lint`, `npm run build`, `git diff --check`, and `unzip -t public/downloads/theme-hub-skill.zip` pass. The archive has `theme-hub/` as its root and contains `SKILL.md`, `agents`, `scripts`, and `references`.
 
 What to do next:
-Deploy the current source and verify that Sites provisions the `THEME_ASSETS` R2 binding and applies migration 0001. Smoke-test one consented proposal with a disposable preview, then remove or mark the fixture. Test the downloaded plugin bundle in a fresh Codex task. Prepare privacy, terms, support, listing assets, five positive tests, and three negative tests for a skills-only public plugin submission.
+Deploy the current source, verify the new Skill archive returns 200 and the removed plugin archive returns 404, and smoke-test both write endpoints without creating a real proposal. Then test the downloaded Skill in a fresh Codex task. Before broad promotion, add managed rate limiting and reviewer tooling. Later prepare privacy, terms, support, listing assets, five positive tests, and three negative tests for a skills-only public plugin submission.
 
 Known risks:
-There is no documented direct Codex appearance-import deep link, so native import still requires user confirmation. The plugin archive is a development distribution, not a public Marketplace listing; the website must not call it true one-click installation. Anonymous proposal upload needs rate limiting and reviewer tooling before broad promotion. The QQ penguin fan preview remains third-party IP risk. Remote `.codexskin` and Styler adapters remain unavailable.
+The Skill client marker is a public identifier, not authentication; it blocks casual cross-site abuse but not determined automated traffic. There is still no robust server-side rate limit. Third-party preview URLs can create hotlink/privacy risk. Fan-created IP such as the QQ-inspired preview requires rights review. `.codexskin` and Styler adapters remain unavailable. There is no documented direct Codex appearance-import deep link, so supported native imports still require user confirmation.

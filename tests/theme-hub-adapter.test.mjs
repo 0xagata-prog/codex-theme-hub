@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, readdir } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { matchesImageSignature } from "../lib/image-security.ts";
 
 import {
   confirmTransaction,
@@ -134,4 +135,31 @@ test("refuses generated-theme upload without explicit consent", async () => {
     }),
     /explicit --consent yes/,
   );
+});
+
+test("verifies declared image types by file signature", () => {
+  assert.equal(matchesImageSignature("image/png", Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), true);
+  assert.equal(matchesImageSignature("image/jpeg", Uint8Array.from([0xff, 0xd8, 0xff, 0xe0])), true);
+  assert.equal(matchesImageSignature("image/png", new TextEncoder().encode("<script>alert(1)</script>")), false);
+});
+
+test("marks consented proposal requests as Theme Hub Skill traffic", async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), "theme-hub-submit-test-"));
+  const previewPath = path.join(stateRoot, "preview.png");
+  await writeFile(previewPath, Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  let clientHeader = "";
+  const result = await submitThemeProposal({
+    name: "Safe Preview",
+    author: "Theme Maker",
+    platform: "桌面端",
+    palette: "#111111,#EEEEEE,#635BFF",
+    previewPath,
+    consent: "yes",
+    fetchImpl: async (_url, init) => {
+      clientHeader = init.headers["X-Theme-Hub-Client"];
+      return Response.json({ proposal: { id: "proposal-id", status: "pending" } }, { status: 201 });
+    },
+  });
+  assert.equal(clientHeader, "theme-hub-skill-v1");
+  assert.equal(result.status, "pending");
 });

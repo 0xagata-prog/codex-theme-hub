@@ -17,9 +17,14 @@ function isGitHubRepoUrl(value: string) {
 export async function POST(request: Request) {
   try {
     const origin = request.headers.get("origin");
-    if (origin && origin !== new URL(request.url).origin) {
+    if (origin !== new URL(request.url).origin) {
       return Response.json({ error: "跨站投稿请求已拒绝" }, { status: 403 });
     }
+    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+      return Response.json({ error: "投稿格式无效" }, { status: 415 });
+    }
+    const declaredLength = Number(request.headers.get("content-length") ?? 0);
+    if (declaredLength > 16 * 1024) return Response.json({ error: "投稿内容过大" }, { status: 413 });
 
     const payload = (await request.json()) as {
       themeName?: string;
