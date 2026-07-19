@@ -18,7 +18,7 @@ test("uses Codex Skill Installer with GitHub as the canonical source", async () 
   assert.match(page, /我已安装：在 Codex 中打开主题/);
   assert.match(page, /\$skill-installer/);
   assert.match(page, /github\.com\/0xagata-prog\/skindex/);
-  assert.match(page, /skillSourceUrl = `\$\{githubRepoUrl\}\/tree\/v0\.7\.0\/skill`/);
+  assert.match(page, /skillSourceUrl = `\$\{githubRepoUrl\}\/tree\/v0\.7\.1\/skill`/);
   assert.match(page, /SKINDEX_SKILL_READY_KEY = "skindex-skill-ready-v4"/);
   assert.match(page, /return codexPromptUrl\(`\$skindex/);
   assert.doesNotMatch(page, /若不存在，立即停止/);

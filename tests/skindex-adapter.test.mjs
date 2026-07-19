@@ -30,6 +30,7 @@ import {
   dreamSkinRuntimeStatus,
   applyDreamSkinTheme,
   installDreamSkinRuntime,
+  buildDreamSkinHandoffScript,
 } from "../skill/scripts/skindex.mjs";
 
 const samplePath = new URL("../catalog/chalkboard-green.json", import.meta.url);
@@ -320,6 +321,18 @@ test("detects and applies an installed Dream Skin preset through fixed script ar
 test("requires consent and rejects unsupported platforms before runtime installation", async () => {
   await assert.rejects(installDreamSkinRuntime("gothic-void-crusade", { platform: "darwin", consent: "no" }), /consent yes/);
   await assert.rejects(installDreamSkinRuntime("gothic-void-crusade", { platform: "win32", consent: "yes" }), /仅支持 macOS/);
+});
+
+test("builds a visible install handoff that waits for Codex without interpolating paths", () => {
+  const script = buildDreamSkinHandoffScript({
+    commonScript: "/tmp/a folder/common-macos.sh",
+    installer: "/tmp/it's-safe/install.sh",
+    themeName: "Gothic $HOME",
+  });
+  assert.match(script, /while codex_is_running/);
+  assert.match(script, /open|安装/);
+  assert.match(script, /'\/tmp\/it'\\''s-safe\/install\.sh'/);
+  assert.match(script, /'Gothic \$HOME'/);
 });
 
 test("refuses generated-theme upload without explicit consent", async () => {

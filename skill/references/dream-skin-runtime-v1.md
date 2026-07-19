@@ -15,7 +15,7 @@ The catalog runtime plan is data only. It cannot provide commands, scripts, hook
 
 ## Consent boundary
 
-Installing the third-party runtime and applying a theme are separate approvals. Explain that installation downloads and runs the pinned upstream installer, and that a cold apply or restore can restart Codex. Never force-close Codex, silently enable CDP, or treat a website click as approval for local execution.
+Installing the third-party runtime and applying a theme are separate approvals. Explain that installation downloads the pinned source and opens a visible Terminal handoff. The handoff waits for the user to close Codex, runs the fixed installer, removes itself, and lets the upstream runtime relaunch Codex. A cold apply or restore can also restart Codex. Never force-close Codex, silently enable CDP, or treat a website click as approval for local execution.
 
 ## Platform boundary
 
