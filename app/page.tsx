@@ -72,7 +72,7 @@ type InstallGuide = {
 const filters = ["全部", "完整皮肤", "轻量配色", "桌面端", "CLI", "深色", "浅色", "双模式"] as const;
 
 const githubRepoUrl = "https://github.com/0xagata-prog/skindex";
-const skillSourceUrl = `${githubRepoUrl}/tree/v0.7.0/skill`;
+const skillSourceUrl = `${githubRepoUrl}/tree/v0.7.1/skill`;
 const skindexOrigin = "https://codex-skindex.vercel.app";
 const SKINDEX_SKILL_READY_KEY = "skindex-skill-ready-v4";
 const SKINDEX_SAVED_KEY = "skindex-saved-v1";
@@ -675,7 +675,7 @@ export default function Home() {
           <section className="skill-gate-modal" role="dialog" aria-modal="true" aria-labelledby="skill-gate-title" onMouseDown={(event) => event.stopPropagation()}>
             <button className="modal-close" onClick={() => setPendingTheme(null)} aria-label="关闭 SkinDex 安装确认">×</button>
             <span className="section-index">FIRST USE · INSTALL CHECK</span>
-            <h2 id="skill-gate-title">使用主题前，先确认 SkinDex v0.7.0</h2>
+            <h2 id="skill-gate-title">使用主题前，先确认 SkinDex v0.7.1</h2>
             <p>官网无法读取你电脑上的 Codex 技能列表。未安装时直接打开主题，会让 Codex 无效搜索并浪费时间；请选择你的真实状态。</p>
             <div className="skill-gate-options">
               <button className="install-primary" onClick={() => setSkillInstallOpen(true)}>安装或更新 SkinDex →</button>

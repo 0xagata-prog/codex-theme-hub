@@ -2,7 +2,7 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
-import { access, lstat, mkdir, readFile, realpath, rename, writeFile } from "node:fs/promises";
+import { access, chmod, lstat, mkdir, readFile, realpath, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -16,7 +16,7 @@ const FORMAT_ADAPTERS = Object.freeze({
 
 const AVAILABLE_ADAPTERS = new Set(["codex-native-v1"]);
 const DEFAULT_ENDPOINT = "https://codex-skindex.vercel.app";
-const SKILL_VERSION = "0.7.0";
+const SKILL_VERSION = "0.7.1";
 const DREAM_SKIN_REPOSITORY = "https://github.com/Fei-Away/Codex-Dream-Skin";
 const DREAM_SKIN_REVISION = "3af1d6d62f3a0388cc640d2f497ac3100998938e";
 const DREAM_SKIN_PRESETS = Object.freeze({
@@ -617,6 +617,23 @@ function runChecked(spawnImpl, command, args, options = {}) {
   return String(result.stdout || "").trim();
 }
 
+function shellLiteral(value) {
+  return `'${String(value).replaceAll("'", `'\\''`)}'`;
+}
+
+export function buildDreamSkinHandoffScript({ commonScript, installer, themeName }) {
+  return `#!/bin/bash
+set -euo pipefail
+. ${shellLiteral(commonScript)}
+discover_codex_app
+printf 'SkinDex 已准备安装 %s。请关闭 Codex；安装完成后会自动重新打开。\\n' ${shellLiteral(themeName)}
+while codex_is_running; do /bin/sleep 1; done
+handoff="$0"
+( /bin/sleep 3; /bin/rm -f "$handoff" ) &
+exec ${shellLiteral(installer)} --no-launchers
+`;
+}
+
 function requireMac(platform) {
   if (platform !== "darwin") throw new Error("Dream Skin 一键运行时当前仅支持 macOS；Windows 适配尚未开放");
 }
@@ -661,10 +678,20 @@ export async function installDreamSkinRuntime(themeId, {
   const revision = runChecked(spawnImpl, "git", ["-C", paths.sourceRoot, "rev-parse", "HEAD"]);
   if (revision !== DREAM_SKIN_REVISION) throw new Error("Dream Skin checkout did not match the pinned revision");
   const installer = await trustedRegularFile(path.join(paths.sourceRoot, "macos", "scripts", "install-dream-skin-macos.sh"), paths.sourceRoot);
-  runChecked(spawnImpl, "bash", [installer, "--no-launchers", "--no-launch"]);
-  const status = await dreamSkinRuntimeStatus({ home, stateRoot, platform });
-  if (status.status !== "installed") throw new Error("Dream Skin installer finished but the verified runtime scripts are missing");
-  return { status: "installed", themeId, engine: plan.engine, sourceRevision: revision, installRoot: paths.installRoot, nextAction: "runtime-apply" };
+  const commonScript = await trustedRegularFile(path.join(paths.sourceRoot, "macos", "scripts", "common-macos.sh"), paths.sourceRoot);
+  const handoffPath = path.join(stateRoot, "runtimes", "dream-skin", "install-handoff.command");
+  await writeFile(handoffPath, buildDreamSkinHandoffScript({ commonScript, installer, themeName: plan.name }), "utf8");
+  await chmod(handoffPath, 0o700);
+  runChecked(spawnImpl, "/usr/bin/open", ["-a", "Terminal", handoffPath]);
+  return {
+    status: "awaiting-codex-close",
+    themeId,
+    engine: plan.engine,
+    sourceRevision: revision,
+    installRoot: paths.installRoot,
+    nextAction: "close-codex-and-wait-for-relaunch",
+    message: "安装交接已在可见终端中启动。保存当前输入并关闭 Codex；固定版本安装完成后会自动重新打开。",
+  };
 }
 
 export async function applyDreamSkinTheme(themeId, {

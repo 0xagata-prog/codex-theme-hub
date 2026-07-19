@@ -36,9 +36,10 @@ Use each result's `install.supportLevel` and `install.action` when available. `f
 For a Dream Skin `runtime-install` request:
 
 1. Run `node scripts/skindex.mjs runtime-plan --theme <id>` and stop unless the official, pinned plan validates. On Windows or Linux, explain that this adapter is not yet available and do not offer manual script execution as if it were one-click support.
-2. If status is `not-installed`, disclose that Codex Dream Skin is third-party open-source software from `Fei-Away/Codex-Dream-Skin`, uses loopback CDP, writes its own runtime under `~/.codex`, does not patch the Codex bundle, and may require Codex to be closed. Ask for explicit confirmation. Only after yes run `node scripts/skindex.mjs runtime-install --theme <id> --consent yes`.
-3. Before applying, warn that a cold switch may restart Codex and unsaved input should be saved. Ask for explicit confirmation. Only after yes run `node scripts/skindex.mjs runtime-apply --theme <id> --consent yes`.
-4. Report success only after the command returns `applied`. If installation asks for Codex to be closed, stop and give that single action; never force-close it.
+2. If status is `not-installed`, disclose that Codex Dream Skin is third-party open-source software from `Fei-Away/Codex-Dream-Skin`, uses loopback CDP, writes its own runtime under `~/.codex`, does not patch the Codex bundle, and needs Codex closed while it updates appearance config. Explain that SkinDex will open a visible Terminal handoff which waits for the user to close Codex, installs the pinned version, and relaunches Codex. Ask for explicit confirmation. Only after yes run `node scripts/skindex.mjs runtime-install --theme <id> --consent yes`.
+3. When the command returns `awaiting-codex-close`, tell the user to save current input and close Codex. Never force-close it. After the automatic relaunch, verify with `runtime-status`; run `runtime-apply` only if the requested preset is not yet visible.
+4. For an already-installed runtime, warn that a cold switch may restart Codex and unsaved input should be saved. Ask for explicit confirmation. Only after yes run `node scripts/skindex.mjs runtime-apply --theme <id> --consent yes`.
+5. Report success only after the theme is visibly applied or the command returns `applied` after relaunch.
 
 For a lightweight `guided-import` request:
 
